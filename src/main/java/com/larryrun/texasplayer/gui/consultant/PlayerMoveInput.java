@@ -1,5 +1,6 @@
 package com.larryrun.texasplayer.gui.consultant;
 
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -14,6 +15,7 @@ public class PlayerMoveInput {
     private Button foldBtn;
     private Button raiseBtn;
     private TextField raiseField;
+    private Button raiseOkBtn;
 
     private PlayerMoveInput() {}
 
@@ -35,10 +37,20 @@ public class PlayerMoveInput {
         moveInput.grid.add(moveInput.foldBtn, 4, rowIdx);
 
         moveInput.raiseBtn = new Button("Raise");
+        moveInput.raiseBtn.setOnAction(e -> {
+            moveInput.raiseField.setVisible(true);
+            moveInput.raiseOkBtn.setVisible(true);
+        });
         moveInput.grid.add(moveInput.raiseBtn, 5, rowIdx);
 
         moveInput.raiseField = new TextField();
+        moveInput.raiseField.setVisible(false);
+        moveInput.raiseField.setAlignment(Pos.CENTER_RIGHT);
         moveInput.grid.add(moveInput.raiseField, 6, rowIdx);
+
+        moveInput.raiseOkBtn = new Button("OK");
+        moveInput.raiseOkBtn.setVisible(false);
+        moveInput.grid.add(moveInput.raiseOkBtn, 7, rowIdx);
 
         return moveInput;
     }
