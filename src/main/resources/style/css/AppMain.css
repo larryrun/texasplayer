@@ -1,3 +1,7 @@
 .root {
     -fx-background-image: url("../img/background.jpg");
 }
+
+.label {
+    -fx-font-size: 14pt;
+}

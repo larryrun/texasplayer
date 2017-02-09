@@ -27,9 +27,7 @@ public abstract class PlayerController {
         return bettingRound.getHighestBet() == bettingRound.getBetForPlayer(player);
     }
 
-    protected abstract BettingDecision decidePreFlop(Player player,
-                                                     GameHand gameHand, List<Card> cards);
+    protected abstract BettingDecision decidePreFlop(Player player, GameHand gameHand, List<Card> cards);
 
-    protected abstract BettingDecision decideAfterFlop(Player player,
-                                                       GameHand gameHand, List<Card> cards);
+    protected abstract BettingDecision decideAfterFlop(Player player, GameHand gameHand, List<Card> cards);
 }

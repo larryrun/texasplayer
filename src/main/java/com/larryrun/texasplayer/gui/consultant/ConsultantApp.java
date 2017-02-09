@@ -1,5 +1,6 @@
 package com.larryrun.texasplayer.gui.consultant;
 
+import com.larryrun.texasplayer.gui.GUIUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -34,8 +35,8 @@ public class ConsultantApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> Platform.runLater(() -> showErrorDialog(t, e)));
-        Thread.currentThread().setUncaughtExceptionHandler(this::showErrorDialog);
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> Platform.runLater(() -> GUIUtils.showErrorAlert(e.getMessage())));
+        Thread.currentThread().setUncaughtExceptionHandler((t, e) -> GUIUtils.showErrorAlert(e.getMessage()));
 
         primaryStage.setTitle("Texas Player");
         outerContainer = initOuterContainer();
@@ -154,16 +155,6 @@ public class ConsultantApp extends Application {
 
     private void gameStart() {
         PlayerInfoInput playerInfoInput = getDealer();
-    }
-
-    private void showErrorDialog(Thread t, Throwable e) {
-        Stage dialog = new Stage();
-        BorderPane border = new BorderPane();
-        dialog.setScene(new Scene(border, 400, 200));
-        border.setCenter(new Text(e.getMessage()));
-        dialog.setTitle("Error");
-        dialog.initModality(Modality.APPLICATION_MODAL);
-        dialog.showAndWait();
     }
 
 }

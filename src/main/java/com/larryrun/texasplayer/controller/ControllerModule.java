@@ -8,6 +8,7 @@ import com.larryrun.texasplayer.controller.phase2.PlayerControllerPhaseIIBluff;
 import com.larryrun.texasplayer.controller.phase2.PlayerControllerPhaseIINormal;
 import com.larryrun.texasplayer.controller.phase3.PlayerControllerPhaseIIIAgressive;
 import com.larryrun.texasplayer.controller.phase3.PlayerControllerPhaseIIIConservative;
+import com.larryrun.texasplayer.controller.player.PlayerControllerSelf;
 import com.larryrun.texasplayer.controller.preflopsim.PreFlopSimulatorModule;
 
 import javax.inject.Singleton;
@@ -17,7 +18,6 @@ public class ControllerModule extends AbstractModule {
     protected void configure() {
         install(new PreFlopSimulatorModule());
 
-        bind(PokerController.class).in(Singleton.class);
         bind(GameHandController.class).in(Singleton.class);
         bind(HandPowerRanker.class).in(Singleton.class);
         bind(StatisticsController.class).in(Singleton.class);
@@ -31,5 +31,7 @@ public class ControllerModule extends AbstractModule {
         bind(PlayerControllerPhaseIIBluff.class).in(Singleton.class);
         bind(PlayerControllerPhaseIIIAgressive.class).in(Singleton.class);
         bind(PlayerControllerPhaseIIIConservative.class).in(Singleton.class);
+
+        bind(PlayerControllerSelf.class).in(Singleton.class);
     }
 }
