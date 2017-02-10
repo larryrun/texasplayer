@@ -58,22 +58,50 @@ public class AIGameGameHandController {
     private GameRound currentGameRound;
 
     protected Boolean playRound(GameHand gameHand) {
-        currentGameRound = new GameRound(gameHand);
+        currentGameRound = new GameRound(gameHand, gameProperties, handStrengthEvaluator);
+
+        gameHand.nextRound();
+        int toPlay = gameHand.getPlayersCount();
+        if (gameHand.getBettingRoundName().equals(BettingRoundName.PRE_FLOP)) {
+            takeBlinds(gameHand);
+            toPlay--; // Big blinds don't have to call on himself if no raise :)
+        }
+
+        int turn = 1;
+        int numberOfPlayersAtBeginningOfRound = gameHand.getPlayersCount();
+        while (toPlay > 0) {
+            Player player = gameHand.getNextPlayer();
+            BettingDecision bettingDecision = player.decide(gameHand);
+
+            // We can't raise at second turn
+            if (turn > numberOfPlayersAtBeginningOfRound
+                    && bettingDecision.equals(BettingDecision.RAISE)) {
+                bettingDecision = BettingDecision.CALL;
+            }
+
+            // After a raise, every active players after the raiser must play
+            if (bettingDecision.equals(BettingDecision.RAISE)) {
+                toPlay = gameHand.getPlayersCount() - 1;
+            }
+
+            applyDecision(gameHand, player, bettingDecision);
+            turn++;
+            toPlay--;
+        }
+
+        // Check if we have a winner
+        if (gameHand.getPlayersCount() == 1) {
+            Player winner = gameHand.getCurrentPlayer();
+            winner.addMoney(gameHand.getTotalBets());
+            return true;
+        }
         return false;
     }
 
-    public void takeBlinds(GameHand gameHand) {
-        Player smallBlindPlayer = gameHand.getNextPlayer();
-        Player bigBlindPlayer = gameHand.getNextPlayer();
+    public void playAIPlayersMove() {
 
-        gameHand.getCurrentBettingRound().placeBet(smallBlindPlayer, gameProperties.getSmallBlind());
-        gameHand.getCurrentBettingRound().placeBet(bigBlindPlayer, gameProperties.getBigBlind());
     }
 
-    public void applyDecision(GameHand gameHand, Player player, BettingDecision bettingDecision) {
-        double handStrength = handStrengthEvaluator.evaluate(player.getHoleCards(), gameHand.getSharedCards(), gameHand.getPlayersCount());
-        gameHand.applyDecision(player, bettingDecision, gameProperties, handStrength);
-    }
 
     protected List<Player> getWinners(GameHand gameHand) {
         Iterable<Player> activePlayers = gameHand.getPlayers();
@@ -96,6 +124,19 @@ public class AIGameGameHandController {
         }
         statisticsController.storeWinners(winners);
         return winners;
+    }
+
+    private void takeBlinds(GameHand gameHand) {
+        Player smallBlindPlayer = gameHand.getNextPlayer();
+        Player bigBlindPlayer = gameHand.getNextPlayer();
+
+        gameHand.getCurrentBettingRound().placeBet(smallBlindPlayer, gameProperties.getSmallBlind());
+        gameHand.getCurrentBettingRound().placeBet(bigBlindPlayer, gameProperties.getBigBlind());
+    }
+
+    private void applyDecision(GameHand gameHand, Player player, BettingDecision bettingDecision) {
+        double handStrength = handStrengthEvaluator.evaluate(player.getHoleCards(), gameHand.getSharedCards(), gameHand.getPlayersCount());
+        gameHand.applyDecision(player, bettingDecision, gameProperties, handStrength);
     }
 
     protected void showDown(GameHand gameHand) {

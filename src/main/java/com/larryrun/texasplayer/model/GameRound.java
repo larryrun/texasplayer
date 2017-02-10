@@ -1,23 +1,27 @@
 package com.larryrun.texasplayer.model;
 
 import com.larryrun.texasplayer.controller.GameHandController;
+import com.larryrun.texasplayer.controller.HandStrengthEvaluator;
+import com.larryrun.texasplayer.model.gameproperties.GameProperties;
 
 public class GameRound {
     private GameHand gameHand;
-    private GameHandController gameHandController;
+    private GameProperties gameProperties;
+    private HandStrengthEvaluator handStrengthEvaluator;
+
     private int toPlay;
     private int turn;
     private int numberOfPlayersAtBeginningOfRound;
 
-
-    public GameRound(GameHand gameHand, GameHandController gameHandController) {
+    public GameRound(GameHand gameHand, GameProperties gameProperties, HandStrengthEvaluator handStrengthEvaluator) {
         this.gameHand = gameHand;
-        this.gameHandController = gameHandController;
+        this.gameProperties = gameProperties;
+        this.handStrengthEvaluator = handStrengthEvaluator;
 
         gameHand.nextRound();
         toPlay = gameHand.getPlayersCount();
         if (gameHand.getBettingRoundName().equals(BettingRoundName.PRE_FLOP)) {
-            gameHandController.takeBlinds(gameHand);
+            takeBlinds(gameHand);
             toPlay--; // Big blinds don't have to call on himself if no raise :)
         }
 
@@ -31,8 +35,7 @@ public class GameRound {
             BettingDecision bettingDecision = player.decide(gameHand);
 
             // We can't raise at second turn
-            if (turn > numberOfPlayersAtBeginningOfRound
-                    && bettingDecision.equals(BettingDecision.RAISE)) {
+            if (turn > numberOfPlayersAtBeginningOfRound && bettingDecision.equals(BettingDecision.RAISE)) {
                 bettingDecision = BettingDecision.CALL;
             }
 
@@ -41,7 +44,8 @@ public class GameRound {
                 toPlay = gameHand.getPlayersCount() - 1;
             }
 
-            gameHandController.applyDecision(gameHand, player, bettingDecision);
+            applyDecision(gameHand, player, bettingDecision);
+
             turn++;
             toPlay--;
         }
@@ -54,5 +58,6 @@ public class GameRound {
         }
         return false;
     }
+
 
 }
