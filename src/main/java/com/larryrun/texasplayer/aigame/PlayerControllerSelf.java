@@ -1,4 +1,4 @@
-package com.larryrun.texasplayer.controller.player;
+package com.larryrun.texasplayer.aigame;
 
 import com.larryrun.texasplayer.controller.PlayerController;
 import com.larryrun.texasplayer.model.BettingDecision;

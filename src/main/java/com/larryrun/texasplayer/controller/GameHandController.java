@@ -51,7 +51,7 @@ public class GameHandController {
         }
     }
 
-    private GameHand createGameHand(Game game) {
+    protected GameHand createGameHand(Game game) {
         GameHand gameHand = new GameHand(game.getPlayers());
         game.addGameHand(gameHand);
         return gameHand;
@@ -108,14 +108,12 @@ public class GameHandController {
         logger.log(logMsg);
     }
 
-    private void takeBlinds(GameHand gameHand) {
+    public void takeBlinds(GameHand gameHand) {
         Player smallBlindPlayer = gameHand.getNextPlayer();
         Player bigBlindPlayer = gameHand.getNextPlayer();
 
-        logger.log(smallBlindPlayer + ": Small blind "
-                + gameProperties.getSmallBlind() + "$");
-        logger.log(bigBlindPlayer + ": Big blind "
-                + gameProperties.getBigBlind() + "$");
+        logger.log(smallBlindPlayer + ": Small blind " + gameProperties.getSmallBlind() + "$");
+        logger.log(bigBlindPlayer + ": Big blind " + gameProperties.getBigBlind() + "$");
 
         gameHand.getCurrentBettingRound().placeBet(smallBlindPlayer,
                 gameProperties.getSmallBlind());
@@ -123,7 +121,7 @@ public class GameHandController {
                 gameProperties.getBigBlind());
     }
 
-    private void applyDecision(GameHand gameHand, Player player, BettingDecision bettingDecision) {
+    public void applyDecision(GameHand gameHand, Player player, BettingDecision bettingDecision) {
         double handStrength = handStrengthEvaluator.evaluate(player.getHoleCards(), gameHand.getSharedCards(),
                 gameHand.getPlayersCount());
         gameHand.applyDecision(player, bettingDecision, gameProperties, handStrength);
@@ -133,7 +131,7 @@ public class GameHandController {
                 + bettingRound.getBetForPlayer(player) + "$");
     }
 
-    private List<Player> getWinners(GameHand gameHand) {
+    protected List<Player> getWinners(GameHand gameHand) {
         Iterable<Player> activePlayers = gameHand.getPlayers();
         List<Card> sharedCards = gameHand.getSharedCards();
 

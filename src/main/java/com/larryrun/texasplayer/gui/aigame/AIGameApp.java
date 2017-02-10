@@ -2,10 +2,12 @@ package com.larryrun.texasplayer.gui.aigame;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.larryrun.texasplayer.controller.AIGameController;
-import com.larryrun.texasplayer.controller.player.PlayerControllerSelf;
-import com.larryrun.texasplayer.dependencyinjection.AIGameModule;
+import com.larryrun.texasplayer.aigame.AIGameController;
+import com.larryrun.texasplayer.aigame.PlayerControllerSelf;
+import com.larryrun.texasplayer.aigame.AIGameModule;
 import com.larryrun.texasplayer.gui.GUIUtils;
+import com.larryrun.texasplayer.model.event.GameEvent;
+import com.larryrun.texasplayer.model.event.GameEventHandler;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -21,7 +23,7 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AIGameApp extends Application {
+public class AIGameApp extends Application implements GameEventHandler {
     private AIGameController gameController;
     private PlayerControllerSelf playerControllerSelf;
 
@@ -118,7 +120,7 @@ public class AIGameApp extends Application {
     }
 
     private void startGame() {
-        Injector injector = Guice.createInjector(new AIGameModule());
+        Injector injector = Guice.createInjector(new AIGameModule(this));
         gameController = injector.getInstance(AIGameController.class);
         playerControllerSelf = injector.getInstance(PlayerControllerSelf.class);
     }
@@ -127,4 +129,8 @@ public class AIGameApp extends Application {
 
     }
 
+    @Override
+    public void handleGameEvent(GameEvent gameEvent) {
+
+    }
 }

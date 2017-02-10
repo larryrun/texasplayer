@@ -1,6 +1,7 @@
-package com.larryrun.texasplayer.controller;
+package com.larryrun.texasplayer.aigame;
 
 import com.google.inject.Inject;
+import com.larryrun.texasplayer.controller.GameHandController;
 import com.larryrun.texasplayer.model.Game;
 import com.larryrun.texasplayer.model.gameproperties.GameProperties;
 

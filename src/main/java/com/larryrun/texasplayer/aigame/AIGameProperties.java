@@ -1,9 +1,10 @@
-package com.larryrun.texasplayer.model.gameproperties;
+package com.larryrun.texasplayer.aigame;
 
 import com.larryrun.texasplayer.controller.phase3.PlayerControllerPhaseIIIAgressive;
 import com.larryrun.texasplayer.controller.phase3.PlayerControllerPhaseIIIConservative;
-import com.larryrun.texasplayer.controller.player.PlayerControllerSelf;
+import com.larryrun.texasplayer.aigame.PlayerControllerSelf;
 import com.larryrun.texasplayer.model.Player;
+import com.larryrun.texasplayer.model.gameproperties.GameProperties;
 
 import javax.inject.Inject;
 
