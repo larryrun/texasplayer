@@ -3,7 +3,7 @@ package com.larryrun.texasplayer.gui.aigame;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.larryrun.texasplayer.aigame.AIGameController;
-import com.larryrun.texasplayer.aigame.PlayerControllerSelf;
+import com.larryrun.texasplayer.aigame.PlayerControllerHuman;
 import com.larryrun.texasplayer.aigame.AIGameModule;
 import com.larryrun.texasplayer.gui.GUIUtils;
 import com.larryrun.texasplayer.model.event.GameEvent;
@@ -25,7 +25,7 @@ import java.util.List;
 
 public class AIGameApp extends Application implements GameEventHandler {
     private AIGameController gameController;
-    private PlayerControllerSelf playerControllerSelf;
+    private PlayerControllerHuman playerControllerHuman;
 
     private List<PlayerInfoPane> playerInfoPanes;
     private VBox outerContainer;
@@ -109,12 +109,14 @@ public class AIGameApp extends Application implements GameEventHandler {
         hBox.setSpacing(15);
         hBox.getChildren().add(foldBtn);
         hBox.getChildren().add(callBtn);
-        hBox.getChildren().add(raiseBBBtn);
-        hBox.getChildren().add(raise3BBBtn);
-        hBox.getChildren().add(raiseAllBtn);
-        raiseAmountTextField = new TextField();
-        raiseAmountTextField.setAlignment(Pos.CENTER_RIGHT);
-        hBox.getChildren().add(raiseAmountTextField);
+//      only support fixed raise for now
+
+//        hBox.getChildren().add(raiseBBBtn);
+//        hBox.getChildren().add(raise3BBBtn);
+//        hBox.getChildren().add(raiseAllBtn);
+//        raiseAmountTextField = new TextField();
+//        raiseAmountTextField.setAlignment(Pos.CENTER_RIGHT);
+//        hBox.getChildren().add(raiseAmountTextField);
         hBox.getChildren().add(raiseOKBtn);
         outerContainer.getChildren().add(hBox);
     }
@@ -122,11 +124,9 @@ public class AIGameApp extends Application implements GameEventHandler {
     private void startGame() {
         Injector injector = Guice.createInjector(new AIGameModule(this));
         gameController = injector.getInstance(AIGameController.class);
-        playerControllerSelf = injector.getInstance(PlayerControllerSelf.class);
-    }
+        playerControllerHuman = injector.getInstance(PlayerControllerHuman.class);
 
-    private void newTurn() {
-
+        gameController.play();
     }
 
     @Override

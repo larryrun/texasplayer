@@ -19,12 +19,14 @@ public class BettingRound {
         BettingDecision bettingDecision = contextAction.getBettingDecision();
         Player player = contextAction.getPlayer();
 
-        switch (bettingDecision) {
-            case CALL:
-                placeBet(player, highestBet);
-                break;
-            case RAISE:
+        if(bettingDecision.isCall()) {
+            placeBet(player, highestBet);
+        }else if(bettingDecision.isRaise()) {
+            if(bettingDecision.getRaiseAmount() > 0) {
+                placeBet(player, bettingDecision.getRaiseAmount());
+            }else {
                 placeBet(player, highestBet + gameProperties.getBigBlind());
+            }
         }
 
         // Don't save context information for pre flop
@@ -81,7 +83,7 @@ public class BettingRound {
     public int getNumberOfRaises() {
         int numberOfRaises = 0;
         for (ContextInformation contextInformation : contextInformations) {
-            if (contextInformation.getContextAction().getBettingDecision().equals(BettingDecision.RAISE)) {
+            if (contextInformation.getContextAction().getBettingDecision().isRaise()) {
                 numberOfRaises++;
             }
         }

@@ -27,7 +27,7 @@ public class PlayerControllerPhaseIIIAgressive extends PlayerControllerPhaseIII 
                                         int oppponentsWithBetterEstimatedHandStrength,
                                         int opponentsModeledCount) {
         if ((double) oppponentsWithBetterEstimatedHandStrength / opponentsModeledCount > 0.5) {
-            return BettingDecision.RAISE;
+            return BettingDecision.raise(-1);
         } else if (canCheck(gameHand, player)) {
             return BettingDecision.CALL;
         } else {

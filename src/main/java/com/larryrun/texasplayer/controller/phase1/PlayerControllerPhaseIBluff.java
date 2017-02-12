@@ -29,7 +29,7 @@ public class PlayerControllerPhaseIBluff extends PlayerController {
         int sumPower = card1.getNumber().getPower() + card2.getNumber().getPower();
 
         if (card1.getNumber().equals(card2.getNumber()) || sumPower <= 8) {
-            return BettingDecision.RAISE;
+            return BettingDecision.raise(-1);
         } else {
             if (sumPower > 16 || canCheck(gameHand, player)) {
                 return BettingDecision.CALL;
@@ -46,9 +46,9 @@ public class PlayerControllerPhaseIBluff extends PlayerController {
 
         HandPowerType handPowerType = handPower.getHandPowerType();
         if (handPowerType.equals(HandPowerType.HIGH_CARD)) {
-            return BettingDecision.RAISE;
+            return BettingDecision.raise(-1);
         } else if (handPowerType.getPower() >= HandPowerType.STRAIGHT.getPower()) {
-            return BettingDecision.RAISE;
+            return BettingDecision.raise(-1);
         } else {
             if(canCheck(gameHand, player)){
                 return BettingDecision.CALL;

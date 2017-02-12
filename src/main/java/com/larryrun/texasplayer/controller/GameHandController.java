@@ -73,13 +73,12 @@ public class GameHandController {
             BettingDecision bettingDecision = player.decide(gameHand);
 
             // We can't raise at second turn
-            if (turn > numberOfPlayersAtBeginningOfRound
-                    && bettingDecision.equals(BettingDecision.RAISE)) {
+            if (turn > numberOfPlayersAtBeginningOfRound && bettingDecision.isRaise()) {
                 bettingDecision = BettingDecision.CALL;
             }
 
             // After a raise, every active players after the raiser must play
-            if (bettingDecision.equals(BettingDecision.RAISE)) {
+            if (bettingDecision.isRaise()) {
                 toPlay = gameHand.getPlayersCount() - 1;
             }
 
@@ -115,20 +114,16 @@ public class GameHandController {
         logger.log(smallBlindPlayer + ": Small blind " + gameProperties.getSmallBlind() + "$");
         logger.log(bigBlindPlayer + ": Big blind " + gameProperties.getBigBlind() + "$");
 
-        gameHand.getCurrentBettingRound().placeBet(smallBlindPlayer,
-                gameProperties.getSmallBlind());
-        gameHand.getCurrentBettingRound().placeBet(bigBlindPlayer,
-                gameProperties.getBigBlind());
+        gameHand.getCurrentBettingRound().placeBet(smallBlindPlayer, gameProperties.getSmallBlind());
+        gameHand.getCurrentBettingRound().placeBet(bigBlindPlayer, gameProperties.getBigBlind());
     }
 
     public void applyDecision(GameHand gameHand, Player player, BettingDecision bettingDecision) {
-        double handStrength = handStrengthEvaluator.evaluate(player.getHoleCards(), gameHand.getSharedCards(),
-                gameHand.getPlayersCount());
+        double handStrength = handStrengthEvaluator.evaluate(player.getHoleCards(), gameHand.getSharedCards(), gameHand.getPlayersCount());
         gameHand.applyDecision(player, bettingDecision, gameProperties, handStrength);
 
         BettingRound bettingRound = gameHand.getCurrentBettingRound();
-        logger.log(player + ": " + bettingDecision + " "
-                + bettingRound.getBetForPlayer(player) + "$");
+        logger.log(player + ": " + bettingDecision + " " + bettingRound.getBetForPlayer(player) + "$");
     }
 
     protected List<Player> getWinners(GameHand gameHand) {

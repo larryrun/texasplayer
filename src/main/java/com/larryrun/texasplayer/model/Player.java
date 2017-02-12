@@ -1,5 +1,6 @@
 package com.larryrun.texasplayer.model;
 
+import com.larryrun.texasplayer.aigame.PlayerControllerHuman;
 import com.larryrun.texasplayer.controller.PlayerController;
 import com.larryrun.texasplayer.model.cards.Card;
 
@@ -12,8 +13,7 @@ public class Player {
     private int money;
     private List<Card> holeCards;
 
-    public Player(int number, int initialMoney,
-            PlayerController playerController) {
+    public Player(int number, int initialMoney, PlayerController playerController) {
         this.number = number;
         this.money = initialMoney;
         this.playerController = playerController;
@@ -78,5 +78,9 @@ public class Player {
 
     public PlayerController getPlayerController() {
         return playerController;
+    }
+
+    public boolean isHumanPlayer() {
+        return playerController instanceof PlayerControllerHuman;
     }
 }

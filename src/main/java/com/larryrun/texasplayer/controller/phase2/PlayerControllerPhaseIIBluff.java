@@ -41,7 +41,7 @@ public class PlayerControllerPhaseIIBluff extends PlayerControllerPhaseII {
         double percentageOfWins = preFlopPersistence.retrieve(gameHand.getPlayers().size(), equivalenceClass);
 
         if (percentageOfWins > 0.6 || percentageOfWins < 0.1)
-            return BettingDecision.RAISE;
+            return BettingDecision.raise(-1);
         else if (percentageOfWins < 0.45)
             return BettingDecision.FOLD;
         return BettingDecision.CALL;
@@ -54,11 +54,11 @@ public class PlayerControllerPhaseIIBluff extends PlayerControllerPhaseII {
         // Bluff
         if(p < 0.2){
             if(gameHand.getBettingRoundName().equals(BettingRoundName.POST_FLOP)){
-                return BettingDecision.RAISE;
+                return BettingDecision.raise(-1);
             }
             else if(ContextPlayers.valueFor(gameHand.getPlayersCount()).equals(ContextPlayers.FEW)){
                 // Not too much player in post-turn and post-river
-                return BettingDecision.RAISE;
+                return BettingDecision.raise(-1);
             }
             else{
                 return BettingDecision.FOLD;
@@ -66,7 +66,7 @@ public class PlayerControllerPhaseIIBluff extends PlayerControllerPhaseII {
         }
 
         if (p > 0.8) {
-            return BettingDecision.RAISE;
+            return BettingDecision.raise(-1);
         } else if (p > 0.4 || canCheck(gameHand, player)) {
             return BettingDecision.CALL;
         }

@@ -105,8 +105,7 @@ public class GameHand {
         return this.players;
     }
 
-    public void applyDecision(Player player, BettingDecision bettingDecision, GameProperties gameProperties,
-                              double handStrength) {
+    public void applyDecision(Player player, BettingDecision bettingDecision, GameProperties gameProperties, double handStrength) {
         BettingRound currentBettingRound = getCurrentBettingRound();
         double potOdds = calculatePotOdds(player);
         ContextAction contextAction = new ContextAction(player, bettingDecision, getBettingRoundName(),

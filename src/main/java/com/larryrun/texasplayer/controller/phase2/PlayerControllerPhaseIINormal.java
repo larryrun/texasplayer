@@ -39,7 +39,7 @@ public class PlayerControllerPhaseIINormal extends PlayerControllerPhaseII {
         double percentageOfWins = preFlopPersistence.retrieve(gameHand.getPlayers().size(), equivalenceClass);
 
         if (percentageOfWins > 0.6)
-            return BettingDecision.RAISE;
+            return BettingDecision.raise(-1);
         else if (percentageOfWins < 0.45)
             return BettingDecision.FOLD;
         return BettingDecision.CALL;
@@ -50,7 +50,7 @@ public class PlayerControllerPhaseIINormal extends PlayerControllerPhaseII {
         double p = calculateCoefficient(gameHand, player);
 
         if (p > 0.8) {
-            return BettingDecision.RAISE;
+            return BettingDecision.raise(-1);
         } else if (p > 0.4 || canCheck(gameHand, player)) {
             return BettingDecision.CALL;
         }
