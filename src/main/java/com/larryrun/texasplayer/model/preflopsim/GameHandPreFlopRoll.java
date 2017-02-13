@@ -1,5 +1,6 @@
 package com.larryrun.texasplayer.model.preflopsim;
 
+import com.larryrun.texasplayer.controller.GameEventDispatcher;
 import com.larryrun.texasplayer.model.GameHand;
 import com.larryrun.texasplayer.model.Player;
 import com.larryrun.texasplayer.model.cards.Card;
@@ -12,8 +13,10 @@ public class GameHandPreFlopRoll extends GameHand {
 
     private final EquivalenceClass equivalenceClass;
 
-    public GameHandPreFlopRoll(final List<Player> players, final EquivalenceClass equivalenceClass) {
-        super(players);
+    public GameHandPreFlopRoll(final List<Player> players,
+                               final EquivalenceClass equivalenceClass,
+                               final GameEventDispatcher gameEventDispatcher) {
+        super(players, gameEventDispatcher);
         this.equivalenceClass = equivalenceClass;
     }
 

@@ -17,6 +17,7 @@ public class GameHandController {
     private final StatisticsController statisticsController;
     private final HandStrengthEvaluator handStrengthEvaluator;
     private final OpponentModeler opponentModeler;
+    protected final GameEventDispatcher gameEventDispatcher;
 
     @Inject
     public GameHandController(final Logger logger,
@@ -24,13 +25,15 @@ public class GameHandController {
                               final GameProperties gameProperties,
                               final StatisticsController statisticsController,
                               final HandStrengthEvaluator handStrengthEvaluator,
-                              final OpponentModeler opponentModeler) {
+                              final OpponentModeler opponentModeler,
+                              final GameEventDispatcher gameEventDispatcher) {
         this.logger = logger;
         this.handPowerRanker = handPowerRanker;
         this.gameProperties = gameProperties;
         this.statisticsController = statisticsController;
         this.handStrengthEvaluator = handStrengthEvaluator;
         this.opponentModeler = opponentModeler;
+        this.gameEventDispatcher = gameEventDispatcher;
     }
 
     public void play(Game game) {
@@ -52,7 +55,7 @@ public class GameHandController {
     }
 
     protected GameHand createGameHand(Game game) {
-        GameHand gameHand = new GameHand(game.getPlayers());
+        GameHand gameHand = new GameHand(game.getPlayers(), gameEventDispatcher);
         game.addGameHand(gameHand);
         return gameHand;
     }

@@ -1,5 +1,6 @@
 package com.larryrun.texasplayer.aigame;
 
+import com.larryrun.texasplayer.controller.GameEventDispatcher;
 import com.larryrun.texasplayer.controller.phase3.PlayerControllerPhaseIIIAgressive;
 import com.larryrun.texasplayer.controller.phase3.PlayerControllerPhaseIIIConservative;
 import com.larryrun.texasplayer.model.Player;
@@ -11,13 +12,12 @@ public class AIGameProperties extends GameProperties {
 
     @Inject
     public AIGameProperties(final PlayerControllerHuman playerControllerHuman,
-                            final PlayerControllerPhaseIIIAgressive playerControllerPhaseIIIAgressive,
-                            final PlayerControllerPhaseIIIConservative playerControllerPhaseIIIConservative) {
+                            final PlayerControllerAI playerControllerAI,
+                            final GameEventDispatcher gameEventDispatcher) {
         super(0, 10000, 20, 10);
 
-        addPlayer(new Player(1, getInitialMoney(), playerControllerHuman));
-        addPlayer(new Player(2, getInitialMoney(), playerControllerPhaseIIIAgressive));
-//        addPlayer(new Player(3, getInitialMoney(), playerControllerPhaseIIIConservative));
+        addPlayer(new Player(1, getInitialMoney(), playerControllerHuman, gameEventDispatcher));
+        addPlayer(new Player(2, getInitialMoney(), playerControllerAI, gameEventDispatcher));
     }
 
 }

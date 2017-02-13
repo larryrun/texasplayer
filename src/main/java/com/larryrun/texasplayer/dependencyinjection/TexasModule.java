@@ -1,7 +1,11 @@
 package com.larryrun.texasplayer.dependencyinjection;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 import com.larryrun.texasplayer.controller.ControllerModule;
+import com.larryrun.texasplayer.controller.GameEventDispatcher;
+import com.larryrun.texasplayer.model.event.GameEvent;
+import com.larryrun.texasplayer.model.event.GameEventHandler;
 import com.larryrun.texasplayer.model.gameproperties.GameProperties;
 import com.larryrun.texasplayer.persistence.PersistenceModule;
 import com.larryrun.texasplayer.utils.Logger;
@@ -32,5 +36,10 @@ public class TexasModule extends AbstractModule {
 
         bind(GameProperties.class).toProvider(GamePropertiesProvider.class).in(Singleton.class);
         bind(Logger.class).toProvider(LoggerProvider.class).in(Singleton.class);
+    }
+
+    @Provides
+    public GameEventDispatcher provideGameEventDispatcher() {
+        return new GameEventDispatcher(gameEvent -> {});
     }
 }

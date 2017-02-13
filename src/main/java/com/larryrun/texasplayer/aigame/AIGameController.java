@@ -22,4 +22,7 @@ public class AIGameController {
         game.setNextDealer();
     }
 
+    public GameHandController getGameHandController() {
+        return gameHandController;
+    }
 }

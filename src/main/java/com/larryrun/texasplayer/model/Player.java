@@ -1,6 +1,7 @@
 package com.larryrun.texasplayer.model;
 
 import com.larryrun.texasplayer.aigame.PlayerControllerHuman;
+import com.larryrun.texasplayer.controller.GameEventDispatcher;
 import com.larryrun.texasplayer.controller.PlayerController;
 import com.larryrun.texasplayer.model.cards.Card;
 
@@ -12,11 +13,13 @@ public class Player {
     private final PlayerController playerController;
     private int money;
     private List<Card> holeCards;
+    private GameEventDispatcher gameEventDispatcher;
 
-    public Player(int number, int initialMoney, PlayerController playerController) {
+    public Player(int number, int initialMoney, PlayerController playerController, GameEventDispatcher gameEventDispatcher) {
         this.number = number;
         this.money = initialMoney;
         this.playerController = playerController;
+        this.gameEventDispatcher = gameEventDispatcher;
     }
 
     @Override

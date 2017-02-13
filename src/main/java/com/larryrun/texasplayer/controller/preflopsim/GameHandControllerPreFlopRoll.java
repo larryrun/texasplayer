@@ -1,10 +1,7 @@
 package com.larryrun.texasplayer.controller.preflopsim;
 
 import com.google.inject.Inject;
-import com.larryrun.texasplayer.controller.GameHandController;
-import com.larryrun.texasplayer.controller.HandPowerRanker;
-import com.larryrun.texasplayer.controller.HandStrengthEvaluator;
-import com.larryrun.texasplayer.controller.StatisticsController;
+import com.larryrun.texasplayer.controller.*;
 import com.larryrun.texasplayer.controller.opponentmodeling.OpponentModeler;
 import com.larryrun.texasplayer.model.BettingRoundName;
 import com.larryrun.texasplayer.model.Game;
@@ -18,9 +15,13 @@ public class GameHandControllerPreFlopRoll extends GameHandController {
 
     @Inject
     public GameHandControllerPreFlopRoll(Logger logger,
-            HandPowerRanker handPowerRanker, GameProperties gameProperties,
-            StatisticsController statisticsController, HandStrengthEvaluator handStrengthEvaluator, OpponentModeler opponentModeler) {
-        super(logger, handPowerRanker, gameProperties, statisticsController, handStrengthEvaluator, opponentModeler);
+                                         HandPowerRanker handPowerRanker,
+                                         GameProperties gameProperties,
+                                         StatisticsController statisticsController,
+                                         HandStrengthEvaluator handStrengthEvaluator,
+                                         OpponentModeler opponentModeler,
+                                         GameEventDispatcher gameEventDispatcher) {
+        super(logger, handPowerRanker, gameProperties, statisticsController, handStrengthEvaluator, opponentModeler, gameEventDispatcher);
     }
 
     public void play(Game game, EquivalenceClass equivalenceClass) {
@@ -45,8 +46,7 @@ public class GameHandControllerPreFlopRoll extends GameHandController {
     }
 
     private GameHand createGameHand(Game game, EquivalenceClass equivalenceClass) {
-        GameHand gameHand = new GameHandPreFlopRoll(game.getPlayers(),
-                equivalenceClass);
+        GameHand gameHand = new GameHandPreFlopRoll(game.getPlayers(), equivalenceClass, gameEventDispatcher);
         game.addGameHand(gameHand);
         return gameHand;
     }

@@ -1,26 +1,30 @@
 package com.larryrun.texasplayer.gui.aigame;
 
+import com.larryrun.texasplayer.model.cards.Card;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 
 public class PlayerInfoPane extends HBox {
-    private Label onTurnLabel, roleLabel, balanceLabel, actionLabel, frontMoneyLabel;
+    private Label onTurnLabel, roleLabel, balanceLabel, cardLabel, actionLabel, frontMoneyLabel;
 
     public PlayerInfoPane(String name, GridPane outerContainer, int rowIdx) {
         onTurnLabel = new Label(" ");
         roleLabel = new Label();
         Label playerNameLabel = new Label(name);
         balanceLabel = new Label();
+        cardLabel = new Label("  ");
         actionLabel = new Label();
         frontMoneyLabel = new Label();
 
-        outerContainer.add(onTurnLabel, 0, rowIdx);
-        outerContainer.add(roleLabel, 1, rowIdx);
-        outerContainer.add(playerNameLabel, 2, rowIdx);
-        outerContainer.add(balanceLabel, 3, rowIdx);
-        outerContainer.add(actionLabel, 4, rowIdx);
-        outerContainer.add(frontMoneyLabel, 5, rowIdx);
+        int columnIdx = 0;
+        outerContainer.add(onTurnLabel, columnIdx++, rowIdx);
+        outerContainer.add(roleLabel, columnIdx++, rowIdx);
+        outerContainer.add(playerNameLabel, columnIdx++, rowIdx);
+        outerContainer.add(balanceLabel, columnIdx++, rowIdx);
+        outerContainer.add(cardLabel, columnIdx++, rowIdx);
+        outerContainer.add(actionLabel, columnIdx++, rowIdx);
+        outerContainer.add(frontMoneyLabel, columnIdx, rowIdx);
     }
 
     public void fold() {
@@ -48,6 +52,10 @@ public class PlayerInfoPane extends HBox {
 
     public void setOnTurn(boolean onTurn) {
         onTurnLabel.setText(onTurn?">": " ");
+    }
+
+    public void setHoleCardInfo(String cardInfo) {
+        cardLabel.setText(cardInfo);
     }
 
 }

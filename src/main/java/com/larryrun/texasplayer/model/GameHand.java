@@ -1,7 +1,9 @@
 package com.larryrun.texasplayer.model;
 
+import com.larryrun.texasplayer.controller.GameEventDispatcher;
 import com.larryrun.texasplayer.model.cards.Card;
 import com.larryrun.texasplayer.model.cards.Deck;
+import com.larryrun.texasplayer.model.event.HoleCardsDealt;
 import com.larryrun.texasplayer.model.gameproperties.GameProperties;
 import com.larryrun.texasplayer.model.opponentmodeling.ContextAction;
 import com.larryrun.texasplayer.model.opponentmodeling.ContextInformation;
@@ -17,9 +19,11 @@ public class GameHand {
     private final List<Card> sharedCards = new ArrayList<Card>();
     private final List<BettingRound> bettingRounds = new ArrayList<BettingRound>();
     private Boolean hasRemoved = true;
+    private GameEventDispatcher gameEventDispatcher;
 
-    public GameHand(List<Player> players) {
-        this.players = new LinkedList<Player>(players);
+    public GameHand(List<Player> players, GameEventDispatcher gameEventDispatcher) {
+        this.players = new LinkedList<>(players);
+        this.gameEventDispatcher = gameEventDispatcher;
 
         deck = new Deck();
     }
@@ -86,6 +90,8 @@ public class GameHand {
         for (Player player : players) {
             Card hole1 = deck.removeTopCard();
             Card hole2 = deck.removeTopCard();
+
+            gameEventDispatcher.fireEvent(new HoleCardsDealt(player, hole1, hole2));
 
             player.setHoleCards(hole1, hole2);
         }

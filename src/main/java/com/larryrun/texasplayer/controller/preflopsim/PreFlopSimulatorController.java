@@ -1,6 +1,7 @@
 package com.larryrun.texasplayer.controller.preflopsim;
 
 import com.larryrun.texasplayer.controller.EquivalenceClassController;
+import com.larryrun.texasplayer.controller.GameEventDispatcher;
 import com.larryrun.texasplayer.controller.StatisticsController;
 import com.larryrun.texasplayer.model.Game;
 import com.larryrun.texasplayer.model.Player;
@@ -23,6 +24,7 @@ public class PreFlopSimulatorController {
     private final GameHandControllerPreFlopRoll gameHandControllerPreFlopRoll;
     private final StatisticsController statisticsController;
     private final PreFlopPersistence preFlopPersistence;
+    private final GameEventDispatcher gameEventDispatcher;
 
     @Inject
     public PreFlopSimulatorController(final Logger logger, final GameProperties gameProperties,
@@ -30,7 +32,8 @@ public class PreFlopSimulatorController {
                                       final EquivalenceClassController equivalenceClassController,
                                       final GameHandControllerPreFlopRoll gameHandControllerPreFlopRoll,
                                       final StatisticsController statisticsController,
-                                      final PreFlopPersistence preFlopPersistence) {
+                                      final PreFlopPersistence preFlopPersistence,
+                                      final GameEventDispatcher gameEventDispatcher) {
         this.logger = logger;
         this.gameProperties = gameProperties;
         this.playerControllerPreFlopRoll = playerControllerPreFlopRoll;
@@ -38,16 +41,17 @@ public class PreFlopSimulatorController {
         this.gameHandControllerPreFlopRoll = gameHandControllerPreFlopRoll;
         this.statisticsController = statisticsController;
         this.preFlopPersistence = preFlopPersistence;
+        this.gameEventDispatcher = gameEventDispatcher;
     }
 
     public void play() {
         this.equivalenceClassController.generateAllEquivalenceClass();
 
-        game.addPlayer(new Player(1, gameProperties.getInitialMoney(), playerControllerPreFlopRoll));
+        game.addPlayer(new Player(1, gameProperties.getInitialMoney(), playerControllerPreFlopRoll, gameEventDispatcher));
         Collection<EquivalenceClass> equivalenceClasses = equivalenceClassController.getEquivalenceClasses();
 
         for (int numberOfPlayers = 2; numberOfPlayers <= 10; numberOfPlayers++) {
-            game.addPlayer(new Player(numberOfPlayers, 0, playerControllerPreFlopRoll));
+            game.addPlayer(new Player(numberOfPlayers, 0, playerControllerPreFlopRoll, gameEventDispatcher));
 
             for (EquivalenceClass equivalenceClass : equivalenceClasses) {
                 statisticsController.initializeStatistics();

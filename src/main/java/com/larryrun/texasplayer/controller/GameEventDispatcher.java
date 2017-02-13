@@ -10,6 +10,8 @@ public class GameEventDispatcher {
     }
 
     public void fireEvent(GameEvent gameEvent) {
-        eventHandler.handleGameEvent(gameEvent);
+        if(eventHandler != null) {
+            eventHandler.handleGameEvent(gameEvent);
+        }
     }
 }

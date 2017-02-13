@@ -8,6 +8,8 @@ import com.larryrun.texasplayer.aigame.AIGameModule;
 import com.larryrun.texasplayer.gui.GUIUtils;
 import com.larryrun.texasplayer.model.event.GameEvent;
 import com.larryrun.texasplayer.model.event.GameEventHandler;
+import com.larryrun.texasplayer.model.event.GameHandCreated;
+import com.larryrun.texasplayer.model.event.HoleCardsDealt;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -25,7 +27,6 @@ import java.util.List;
 
 public class AIGameApp extends Application implements GameEventHandler {
     private AIGameController gameController;
-    private PlayerControllerHuman playerControllerHuman;
 
     private List<PlayerInfoPane> playerInfoPanes;
     private VBox outerContainer;
@@ -124,13 +125,20 @@ public class AIGameApp extends Application implements GameEventHandler {
     private void startGame() {
         Injector injector = Guice.createInjector(new AIGameModule(this));
         gameController = injector.getInstance(AIGameController.class);
-        playerControllerHuman = injector.getInstance(PlayerControllerHuman.class);
-
         gameController.play();
+    }
+
+    private PlayerInfoPane getHumanPlayerInfoPane() {
+        return playerInfoPanes.get(playerInfoPanes.size() - 1);
     }
 
     @Override
     public void handleGameEvent(GameEvent gameEvent) {
-
+        if(gameEvent instanceof GameHandCreated) {
+        }
+        else if(gameEvent instanceof HoleCardsDealt) {
+            HoleCardsDealt holeCardsDealt = (HoleCardsDealt) gameEvent;
+            getHumanPlayerInfoPane().setHoleCardInfo(holeCardsDealt.getCard1() + " " + holeCardsDealt.getCard2());
+        }
     }
 }
