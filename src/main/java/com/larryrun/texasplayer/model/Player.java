@@ -4,6 +4,7 @@ import com.larryrun.texasplayer.aigame.PlayerControllerHuman;
 import com.larryrun.texasplayer.controller.GameEventDispatcher;
 import com.larryrun.texasplayer.controller.PlayerController;
 import com.larryrun.texasplayer.model.cards.Card;
+import com.larryrun.texasplayer.model.event.PlayerBalanceChanged;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,6 +21,7 @@ public class Player {
         this.money = initialMoney;
         this.playerController = playerController;
         this.gameEventDispatcher = gameEventDispatcher;
+
     }
 
     @Override
@@ -65,10 +67,12 @@ public class Player {
 
     public void removeMoney(int amount) {
         money -= amount;
+        this.gameEventDispatcher.fireEvent(new PlayerBalanceChanged(this, -amount));
     }
 
     public void addMoney(int amount) {
         money += amount;
+        this.gameEventDispatcher.fireEvent(new PlayerBalanceChanged(this, amount));
     }
 
     public void setHoleCards(Card hole1, Card hole2) {

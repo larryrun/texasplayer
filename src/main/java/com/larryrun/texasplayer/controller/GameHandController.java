@@ -13,7 +13,7 @@ import java.util.List;
 public class GameHandController {
     protected final Logger logger;
     private final HandPowerRanker handPowerRanker;
-    private final GameProperties gameProperties;
+    protected final GameProperties gameProperties;
     private final StatisticsController statisticsController;
     private final HandStrengthEvaluator handStrengthEvaluator;
     private final OpponentModeler opponentModeler;
@@ -40,6 +40,7 @@ public class GameHandController {
         logger.log("-----------------------------------------");
         logger.logImportant("Game Hand #" + (game.gameHandsCount() + 1));
         logger.log("-----------------------------------------");
+
         GameHand gameHand = createGameHand(game);
 
         Boolean haveWinner = false;
@@ -55,7 +56,7 @@ public class GameHandController {
     }
 
     protected GameHand createGameHand(Game game) {
-        GameHand gameHand = new GameHand(game.getPlayers(), gameEventDispatcher);
+        GameHand gameHand = new GameHand(game.getPlayers(), gameProperties, gameEventDispatcher);
         game.addGameHand(gameHand);
         return gameHand;
     }
@@ -77,7 +78,7 @@ public class GameHandController {
 
             // We can't raise at second turn
             if (turn > numberOfPlayersAtBeginningOfRound && bettingDecision.isRaise()) {
-                bettingDecision = BettingDecision.CALL;
+                bettingDecision = BettingDecision.call(-1);
             }
 
             // After a raise, every active players after the raiser must play

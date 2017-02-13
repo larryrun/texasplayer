@@ -1,4 +1,5 @@
 package com.larryrun.texasplayer.model.event;
 
-public class GameEvent {
+public abstract class GameEvent {
+    public abstract String eventName();
 }

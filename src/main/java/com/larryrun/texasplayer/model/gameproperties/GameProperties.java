@@ -1,5 +1,6 @@
 package com.larryrun.texasplayer.model.gameproperties;
 
+import com.larryrun.texasplayer.controller.GameEventDispatcher;
 import com.larryrun.texasplayer.model.Player;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ public abstract class GameProperties {
     private final int numberOfHands;
     private final List<Player> players = new ArrayList<Player>();
 
-    protected GameProperties(int numberOfHands, int initialMoney, int bigBlind, int smallBlind) {
+    protected GameProperties(int numberOfHands, int initialMoney, int bigBlind, int smallBlind, GameEventDispatcher gameEventDispatcher) {
         this.numberOfHands = numberOfHands;
         this.initialMoney = initialMoney;
         this.bigBlind = bigBlind;

@@ -12,7 +12,7 @@ public class PhaseIIGameProperties extends GameProperties {
     public PhaseIIGameProperties(final PlayerControllerPhaseIINormal playerControllerPhaseIINormal,
                                  final PlayerControllerPhaseIIBluff playerControllerPhaseIIBluff,
                                  final GameEventDispatcher gameEventDispatcher) {
-        super(1000, 1000, 20, 10);
+        super(1000, 1000, 20, 10, gameEventDispatcher);
 
         addPlayer(new Player(1, getInitialMoney(), playerControllerPhaseIIBluff, gameEventDispatcher));
         addPlayer(new Player(2, getInitialMoney(), playerControllerPhaseIIBluff, gameEventDispatcher));

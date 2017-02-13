@@ -9,6 +9,7 @@ import com.larryrun.texasplayer.model.BettingRound;
 import com.larryrun.texasplayer.model.GameHand;
 import com.larryrun.texasplayer.model.Player;
 import com.larryrun.texasplayer.model.cards.Card;
+import com.larryrun.texasplayer.model.gameproperties.GameProperties;
 import com.larryrun.texasplayer.model.opponentmodeling.ContextAction;
 import com.larryrun.texasplayer.model.opponentmodeling.ModelResult;
 
@@ -21,8 +22,9 @@ public class PlayerControllerAI extends PlayerController {
     private final OpponentModeler opponentModeler;
 
     @Inject
-    public PlayerControllerAI(PlayerControllerPhaseIINormal playerControllerPhaseIINormal, HandStrengthEvaluator
-            handStrengthEvaluator, OpponentModeler opponentModeler) {
+    public PlayerControllerAI(PlayerControllerPhaseIINormal playerControllerPhaseIINormal,
+                              HandStrengthEvaluator handStrengthEvaluator,
+                              OpponentModeler opponentModeler) {
         this.playerControllerPhaseIINormal = playerControllerPhaseIINormal;
         this.handStrengthEvaluator = handStrengthEvaluator;
         this.opponentModeler = opponentModeler;
@@ -72,9 +74,9 @@ public class PlayerControllerAI extends PlayerController {
                                         int opponentsWithBetterEstimatedHandStrength,
                                         int opponentsModeledCount) {
         if ((double) opponentsWithBetterEstimatedHandStrength / opponentsModeledCount > 0.5) {
-            return BettingDecision.raise(-1);
+            return BettingDecision.raise(gameHand.getCurrentBettingRound().getHighestBet() + gameHand.getGameProperties().getBigBlind());
         } else if (canCheck(gameHand, player)) {
-            return BettingDecision.CALL;
+            return BettingDecision.call(gameHand.getCurrentBettingRound().getHighestBet());
         } else {
             return BettingDecision.FOLD;
         }

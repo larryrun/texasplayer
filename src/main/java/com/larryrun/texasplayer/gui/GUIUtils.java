@@ -14,8 +14,12 @@ public class GUIUtils {
         alert.setTitle("Error");
         alert.setContentText(message);
 
-        LOG.error(message);
         alert.showAndWait();
     }
 
+    public static void showException(Throwable e) {
+        LOG.error(e.getMessage(), e);
+
+        showErrorAlert(e.getMessage());
+    }
 }

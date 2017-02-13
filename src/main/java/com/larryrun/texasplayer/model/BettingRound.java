@@ -1,5 +1,7 @@
 package com.larryrun.texasplayer.model;
 
+import com.larryrun.texasplayer.controller.GameEventDispatcher;
+import com.larryrun.texasplayer.model.event.BetPlaced;
 import com.larryrun.texasplayer.model.gameproperties.GameProperties;
 import com.larryrun.texasplayer.model.opponentmodeling.ContextAction;
 import com.larryrun.texasplayer.model.opponentmodeling.ContextInformation;
@@ -13,6 +15,11 @@ public class BettingRound {
     private final Map<Player, Integer> playerBets = new HashMap<Player, Integer>();
     private final List<ContextInformation> contextInformations = new ArrayList<ContextInformation>();
     private int highestBet = 0;
+    private GameEventDispatcher gameEventDispatcher;
+
+    public BettingRound(GameEventDispatcher gameEventDispatcher) {
+        this.gameEventDispatcher = gameEventDispatcher;
+    }
 
     public void applyDecision(ContextInformation contextInformation, GameProperties gameProperties) {
         ContextAction contextAction = contextInformation.getContextAction();
@@ -22,12 +29,10 @@ public class BettingRound {
         if(bettingDecision.isCall()) {
             placeBet(player, highestBet);
         }else if(bettingDecision.isRaise()) {
-            if(bettingDecision.getRaiseAmount() > 0) {
-                placeBet(player, bettingDecision.getRaiseAmount());
-            }else {
-                placeBet(player, highestBet + gameProperties.getBigBlind());
-            }
+            placeBet(player, bettingDecision.getAmount());
         }
+
+        gameEventDispatcher.fireEvent(new BetPlaced(player, bettingDecision));
 
         // Don't save context information for pre flop
         // Hand strength is always 0 b/c there's no shared cards

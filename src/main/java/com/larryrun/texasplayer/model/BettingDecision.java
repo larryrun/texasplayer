@@ -1,14 +1,13 @@
 package com.larryrun.texasplayer.model;
 
 public class BettingDecision {
-    public final static BettingDecision CALL = new BettingDecision("CALL", -1);
     public final static BettingDecision FOLD = new BettingDecision("FOLD", -1);
 
     private String action;
-    private int raiseAmount;
+    private int amount;
     private BettingDecision(String action, int amount) {
         this.action = action;
-        this.raiseAmount = amount;
+        this.amount = amount;
     }
 
     /**
@@ -18,6 +17,10 @@ public class BettingDecision {
      */
     public static BettingDecision raise(int amount) {
         return new BettingDecision("RAISE", amount);
+    }
+
+    public static BettingDecision call(int amount) {
+        return new BettingDecision("CALL", amount);
     }
 
     public boolean isCall() {
@@ -32,12 +35,12 @@ public class BettingDecision {
         return "RAISE".equalsIgnoreCase(action);
     }
 
-    public int getRaiseAmount() {
-        return raiseAmount;
+    public int getAmount() {
+        return amount;
     }
 
     @Override
     public String toString() {
-        return action + (isRaise()? " " + raiseAmount: "");
+        return action + (isRaise()? " " + amount : "");
     }
 }

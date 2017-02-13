@@ -7,6 +7,8 @@ import com.larryrun.texasplayer.controller.StatisticsController;
 import com.larryrun.texasplayer.controller.opponentmodeling.OpponentModeler;
 import com.larryrun.texasplayer.model.*;
 import com.larryrun.texasplayer.model.cards.Card;
+import com.larryrun.texasplayer.model.event.BBTaken;
+import com.larryrun.texasplayer.model.event.SBTaken;
 import com.larryrun.texasplayer.model.gameproperties.GameProperties;
 import com.larryrun.texasplayer.utils.Logger;
 
@@ -44,9 +46,7 @@ public class AIGameGameHandController {
         GameHand gameHand = createGameHand(game);
 
         Boolean haveWinner = false;
-        while (!gameHand.getBettingRoundName().equals(
-                BettingRoundName.POST_RIVER)
-                && !haveWinner) {
+        while (!gameHand.getBettingRoundName().equals(BettingRoundName.POST_RIVER) && !haveWinner) {
             haveWinner = playRound(gameHand);
         }
 
@@ -56,7 +56,7 @@ public class AIGameGameHandController {
     }
 
     protected GameHand createGameHand(Game game) {
-        GameHand gameHand = new GameHand(game.getPlayers(), gameEventDispatcher);
+        GameHand gameHand = new GameHand(game.getPlayers(), gameProperties, gameEventDispatcher);
         game.addGameHand(gameHand);
         return gameHand;
     }
@@ -84,6 +84,7 @@ public class AIGameGameHandController {
     public void playAIMoveUntilHumanPlayerTurn() {
         while (toPlay > 0) {
             Player player = currentGameHand.getNextPlayer();
+
             if(player.isHumanPlayer()) {
                 break;
             }
@@ -92,8 +93,9 @@ public class AIGameGameHandController {
 
             // We can't raise at second turn
             if (turn > numberOfPlayersAtBeginningOfRound && bettingDecision.isRaise()) {
-                bettingDecision = BettingDecision.CALL;
+                bettingDecision = BettingDecision.call(-1);
             }
+
 
             // After a raise, every active players after the raiser must play
             if (bettingDecision.isRaise()) {
@@ -111,13 +113,14 @@ public class AIGameGameHandController {
         }
     }
 
-    public void playerHumanMove(BettingDecision humanBettingDecision) {
+    public void playerHumanMove() {
         Player humanPlayer = currentGameHand.getCurrentPlayer();
         PlayerControllerHuman playerControllerHuman = (PlayerControllerHuman) humanPlayer.getPlayerController();
+        BettingDecision humanBettingDecision = playerControllerHuman.decide(humanPlayer, currentGameHand);
 
         // We can't raise at second turn
         if (turn > numberOfPlayersAtBeginningOfRound && humanBettingDecision.isRaise()) {
-            humanBettingDecision = BettingDecision.CALL;
+            humanBettingDecision = BettingDecision.call(-1);
         }
 
         // After a raise, every active players after the raiser must play
@@ -137,7 +140,10 @@ public class AIGameGameHandController {
         Player bigBlindPlayer = gameHand.getNextPlayer();
 
         gameHand.getCurrentBettingRound().placeBet(smallBlindPlayer, gameProperties.getSmallBlind());
+        gameEventDispatcher.fireEvent(new SBTaken(smallBlindPlayer));
+
         gameHand.getCurrentBettingRound().placeBet(bigBlindPlayer, gameProperties.getBigBlind());
+        gameEventDispatcher.fireEvent(new BBTaken(bigBlindPlayer));
     }
 
     private void applyDecision(GameHand gameHand, Player player, BettingDecision bettingDecision) {

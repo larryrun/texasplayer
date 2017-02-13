@@ -1,24 +1,29 @@
 package com.larryrun.texasplayer.gui.aigame;
 
-import com.larryrun.texasplayer.model.cards.Card;
+import com.larryrun.texasplayer.model.BettingDecision;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 
 public class PlayerInfoPane extends HBox {
-    private Label onTurnLabel, roleLabel, balanceLabel, cardLabel, actionLabel, frontMoneyLabel;
+    private Label onTurnLabel, dealerLabel, blindLabel, roleLabel, balanceLabel, cardLabel, actionLabel, frontMoneyLabel;
+    private int balance, frontMoney;
 
     public PlayerInfoPane(String name, GridPane outerContainer, int rowIdx) {
         onTurnLabel = new Label(" ");
+        dealerLabel = new Label(" ");
+        blindLabel = new Label("  ");
         roleLabel = new Label();
         Label playerNameLabel = new Label(name);
         balanceLabel = new Label();
-        cardLabel = new Label("  ");
+        cardLabel = new Label("       ");
         actionLabel = new Label();
         frontMoneyLabel = new Label();
 
         int columnIdx = 0;
         outerContainer.add(onTurnLabel, columnIdx++, rowIdx);
+        outerContainer.add(dealerLabel, columnIdx++, rowIdx);
+        outerContainer.add(blindLabel, columnIdx++, rowIdx);
         outerContainer.add(roleLabel, columnIdx++, rowIdx);
         outerContainer.add(playerNameLabel, columnIdx++, rowIdx);
         outerContainer.add(balanceLabel, columnIdx++, rowIdx);
@@ -27,19 +32,19 @@ public class PlayerInfoPane extends HBox {
         outerContainer.add(frontMoneyLabel, columnIdx, rowIdx);
     }
 
-    public void fold() {
-        actionLabel.setText("FOLD");
-        frontMoneyLabel.setText("");
-    }
-
-    public void call(int amount) {
-        actionLabel.setText("CALL");
-        frontMoneyLabel.setText(String.format("%d", amount));
-    }
-
-    public void raise(int amount) {
-        actionLabel.setText("RAISE");
-        frontMoneyLabel.setText(String.format("%d", amount));
+    public void showBettingDecision(BettingDecision bettingDecision) {
+        if(bettingDecision.isCall()) {
+            actionLabel.setText("CALL");
+            frontMoney += bettingDecision.getAmount();
+            frontMoneyLabel.setText(String.format("%d", frontMoney));
+        }else if(bettingDecision.isRaise()) {
+            actionLabel.setText("RAISE");
+            frontMoney += bettingDecision.getAmount();
+            frontMoneyLabel.setText(String.format("%d", frontMoney));
+        }else {
+            actionLabel.setText("FOLD");
+            frontMoneyLabel.setText("");
+        }
     }
 
     public void setRole(String role) {
@@ -47,7 +52,13 @@ public class PlayerInfoPane extends HBox {
     }
 
     public void setBalance(int balance) {
-        balanceLabel.setText(String.format("%d", balance));
+        this.balance = balance;
+        balanceLabel.setText(String.format("%d", this.balance));
+    }
+
+    public void addBalance(int amount) {
+        this.balance += amount;
+        balanceLabel.setText(String.format("%d", this.balance));
     }
 
     public void setOnTurn(boolean onTurn) {
@@ -58,4 +69,25 @@ public class PlayerInfoPane extends HBox {
         cardLabel.setText(cardInfo);
     }
 
+    public void setDealer(boolean dealer) {
+        if(dealer)
+            dealerLabel.setText("D");
+        else
+            dealerLabel.setText(" ");
+
+    }
+
+    public void setBB(boolean bb) {
+        if(bb)
+            blindLabel.setText("BB");
+        else
+            blindLabel.setText("  ");
+    }
+
+    public void setSB(boolean sb) {
+        if(sb)
+            blindLabel.setText("SB");
+        else
+            blindLabel.setText("  ");
+    }
 }

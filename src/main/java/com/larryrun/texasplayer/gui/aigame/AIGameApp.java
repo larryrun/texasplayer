@@ -1,21 +1,20 @@
 package com.larryrun.texasplayer.gui.aigame;
 
+import com.google.common.base.Joiner;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.larryrun.texasplayer.aigame.AIGameController;
-import com.larryrun.texasplayer.aigame.PlayerControllerHuman;
 import com.larryrun.texasplayer.aigame.AIGameModule;
 import com.larryrun.texasplayer.gui.GUIUtils;
-import com.larryrun.texasplayer.model.event.GameEvent;
-import com.larryrun.texasplayer.model.event.GameEventHandler;
-import com.larryrun.texasplayer.model.event.GameHandCreated;
-import com.larryrun.texasplayer.model.event.HoleCardsDealt;
+import com.larryrun.texasplayer.model.Player;
+import com.larryrun.texasplayer.model.cards.Card;
+import com.larryrun.texasplayer.model.event.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -23,6 +22,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class AIGameApp extends Application implements GameEventHandler {
@@ -30,54 +30,59 @@ public class AIGameApp extends Application implements GameEventHandler {
 
     private List<PlayerInfoPane> playerInfoPanes;
     private VBox outerContainer;
-    private boolean gameStarted;
-    private Button gameStartResetBtn;
+    private boolean handStarted;
+    private Button nextHandBtn;
     private Button foldBtn, callBtn, raiseBBBtn, raise3BBBtn, raiseAllBtn, raiseOKBtn;
     private TextField raiseAmountTextField;
+    private Label publicCardsLabel;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> Platform.runLater(() -> GUIUtils.showErrorAlert(e.getMessage())));
-        Thread.currentThread().setUncaughtExceptionHandler((t, e) -> GUIUtils.showErrorAlert(e.getMessage()));
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> Platform.runLater(() -> GUIUtils.showException(e)));
+        Thread.currentThread().setUncaughtExceptionHandler((t, e) -> GUIUtils.showException(e));
 
-        outerContainer = new VBox();
-        outerContainer.setPadding(new Insets(10));
-        outerContainer.setSpacing(10);
+        try {
+            outerContainer = new VBox();
+            outerContainer.setPadding(new Insets(10));
+            outerContainer.setSpacing(10);
 
-        initGame();
+            initGame();
 
-        Scene scene = new Scene(outerContainer, 1024, 800);
-        primaryStage.setScene(scene);
-        scene.getStylesheets().add(ClassLoader.getSystemResource("style/css/AppMain.css").toExternalForm());
-        primaryStage.show();
+            Scene scene = new Scene(outerContainer, 1024, 800);
+            primaryStage.setScene(scene);
+            scene.getStylesheets().add(ClassLoader.getSystemResource("style/css/AppMain.css").toExternalForm());
+            primaryStage.show();
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void initGame() {
         outerContainer.getChildren().clear();
         playerInfoPanes = new ArrayList<>();
-        gameStarted = false;
+        handStarted = false;
 
         initGameOpBtn();
         initPlayerInfoPanes();
+        initSharedCardsInfo();
         initSelfOpBtn();
+
+        Injector injector = Guice.createInjector(new AIGameModule(this));
+        gameController = injector.getInstance(AIGameController.class);
     }
 
     private void initGameOpBtn() {
-        gameStartResetBtn = new Button("Start Game");
-        gameStartResetBtn.setOnAction(e -> {
-            if(gameStarted) {
-                initGame();
-            }else {
-                gameStartResetBtn.setDisable(true);
-                startGame();
-                gameStarted = true;
-                gameStartResetBtn.setText("Reset Game");
-                gameStartResetBtn.setDisable(false);
+        nextHandBtn = new Button("Next Hand");
+        nextHandBtn.setOnAction(e -> {
+            if(!handStarted) {
+                nextRound();
+                nextHandBtn.setDisable(true);
+                handStarted = true;
             }
         });
 
         HBox hBox = new HBox();
-        hBox.getChildren().add(gameStartResetBtn);
+        hBox.getChildren().add(nextHandBtn);
 
         outerContainer.getChildren().add(hBox);
     }
@@ -87,7 +92,7 @@ public class AIGameApp extends Application implements GameEventHandler {
         gridPane.setHgap(10);
         gridPane.setVgap(5);
         int row = 0;
-        for(; row < 1; row++) {
+        for(; row < 2; row++) {
             PlayerInfoPane infoPane = new PlayerInfoPane("player" + (row + 1), gridPane, row);
             playerInfoPanes.add(infoPane);
         }
@@ -96,6 +101,12 @@ public class AIGameApp extends Application implements GameEventHandler {
         playerInfoPanes.add(selfInfoPane);
 
         outerContainer.getChildren().add(gridPane);
+    }
+
+    private void initSharedCardsInfo() {
+        publicCardsLabel = new Label();
+
+        outerContainer.getChildren().add(publicCardsLabel);
     }
 
     private void initSelfOpBtn() {
@@ -122,9 +133,7 @@ public class AIGameApp extends Application implements GameEventHandler {
         outerContainer.getChildren().add(hBox);
     }
 
-    private void startGame() {
-        Injector injector = Guice.createInjector(new AIGameModule(this));
-        gameController = injector.getInstance(AIGameController.class);
+    private void nextRound() {
         gameController.play();
     }
 
@@ -134,11 +143,80 @@ public class AIGameApp extends Application implements GameEventHandler {
 
     @Override
     public void handleGameEvent(GameEvent gameEvent) {
-        if(gameEvent instanceof GameHandCreated) {
-        }
-        else if(gameEvent instanceof HoleCardsDealt) {
-            HoleCardsDealt holeCardsDealt = (HoleCardsDealt) gameEvent;
-            getHumanPlayerInfoPane().setHoleCardInfo(holeCardsDealt.getCard1() + " " + holeCardsDealt.getCard2());
+        switch (gameEvent.eventName()) {
+            case GameHandStarted.EVENT_NAME:
+                GameHandStarted gameHandStarted = (GameHandStarted)gameEvent;
+                setDealer(gameHandStarted.getDealer());
+                break;
+            case BBTaken.EVENT_NAME:
+                BBTaken bbTaken = (BBTaken) gameEvent;
+                setBB(bbTaken.getPlayer());
+                break;
+            case SBTaken.EVENT_NAME:
+                SBTaken sbTaken = (SBTaken) gameEvent;
+                setSB(sbTaken.getPlayer());
+                break;
+            case HoleCardsDealt.EVENT_NAME:
+                HoleCardsDealt holeCardsDealt = (HoleCardsDealt) gameEvent;
+                if(holeCardsDealt.getPlayer().isHumanPlayer()) {
+                    getHumanPlayerInfoPane().setHoleCardInfo(holeCardsDealt.getCards().get(0) + " " + holeCardsDealt.getCards().get(1));
+                }else {
+                    playerInfoPanes.get(holeCardsDealt.getPlayer().getNumber() - 1).setHoleCardInfo("--- ---");
+                }
+                break;
+            case FlopCardsDealt.EVENT_NAME:
+                FlopCardsDealt flopCardsDealt = (FlopCardsDealt) gameEvent;
+                appendToPublicCardsLabel(flopCardsDealt.getCards());
+                break;
+            case TurnCardDealt.EVENT_NAME:
+                TurnCardDealt turnCardDealt = (TurnCardDealt) gameEvent;
+                appendToPublicCardsLabel(Collections.singletonList(turnCardDealt.getCard()));
+                break;
+            case RiverCardDealt.EVENT_NAME:
+                RiverCardDealt riverCardDealt = (RiverCardDealt) gameEvent;
+                appendToPublicCardsLabel(Collections.singletonList(riverCardDealt.getCard()));
+                break;
+            case PlayerOnTurn.EVENT_NAME:
+                PlayerOnTurn playerOnTurn = (PlayerOnTurn) gameEvent;
+                setPlayerOnTurn(playerOnTurn.getPlayer());
+                break;
+            case BetPlaced.EVENT_NAME:
+                BetPlaced betPlaced = (BetPlaced) gameEvent;
+                playerInfoPanes.get(betPlaced.getPlayer().getNumber() - 1).showBettingDecision(betPlaced.getBettingDecision());
+                break;
+            case PlayerCreated.EVENT_NAME:
+                PlayerCreated playerCreated = (PlayerCreated) gameEvent;
+                playerInfoPanes.get(playerCreated.getPlayer().getNumber() - 1).setBalance(playerCreated.getPlayer().getMoney());
+                break;
+            case PlayerBalanceChanged.EVENT_NAME:
+                PlayerBalanceChanged playerBalanceChanged = (PlayerBalanceChanged) gameEvent;
+                playerInfoPanes.get(playerBalanceChanged.getPlayer().getNumber() - 1).setBalance(playerBalanceChanged.getPlayer().getMoney());
+                break;
         }
     }
+
+    private void setDealer(Player player) {
+        playerInfoPanes.forEach(playerInfoPane -> playerInfoPane.setDealer(false));
+        playerInfoPanes.get(player.getNumber() - 1).setDealer(true);
+    }
+
+    private void setBB(Player player) {
+        playerInfoPanes.forEach(playerInfoPane -> playerInfoPane.setBB(false));
+        playerInfoPanes.get(player.getNumber() - 1).setBB(true);
+    }
+
+    private void setSB(Player player) {
+        playerInfoPanes.forEach(playerInfoPane -> playerInfoPane.setSB(false));
+        playerInfoPanes.get(player.getNumber() - 1).setSB(true);
+    }
+
+    private void appendToPublicCardsLabel(List<Card> s) {
+        publicCardsLabel.setText(publicCardsLabel.getText() + " " + Joiner.on(" ").join(s));
+    }
+
+    private void setPlayerOnTurn(Player player) {
+        playerInfoPanes.forEach(playerInfoPane -> playerInfoPane.setOnTurn(false));
+        playerInfoPanes.get(player.getNumber() - 1).setOnTurn(true);
+    }
+
 }

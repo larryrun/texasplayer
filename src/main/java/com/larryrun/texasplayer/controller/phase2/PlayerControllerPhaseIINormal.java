@@ -42,7 +42,7 @@ public class PlayerControllerPhaseIINormal extends PlayerControllerPhaseII {
             return BettingDecision.raise(-1);
         else if (percentageOfWins < 0.45)
             return BettingDecision.FOLD;
-        return BettingDecision.CALL;
+        return BettingDecision.call(-1);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class PlayerControllerPhaseIINormal extends PlayerControllerPhaseII {
         if (p > 0.8) {
             return BettingDecision.raise(-1);
         } else if (p > 0.4 || canCheck(gameHand, player)) {
-            return BettingDecision.CALL;
+            return BettingDecision.call(-1);
         }
         return BettingDecision.FOLD;
     }

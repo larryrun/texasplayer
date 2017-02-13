@@ -35,8 +35,8 @@ public class ConsultantApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> Platform.runLater(() -> GUIUtils.showErrorAlert(e.getMessage())));
-        Thread.currentThread().setUncaughtExceptionHandler((t, e) -> GUIUtils.showErrorAlert(e.getMessage()));
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> Platform.runLater(() -> GUIUtils.showException(e)));
+        Thread.currentThread().setUncaughtExceptionHandler((t, e) -> GUIUtils.showException(e));
 
         primaryStage.setTitle("Texas Player");
         outerContainer = initOuterContainer();

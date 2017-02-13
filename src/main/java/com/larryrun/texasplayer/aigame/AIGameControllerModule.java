@@ -14,16 +14,14 @@ public class AIGameControllerModule extends AbstractModule {
     protected void configure() {
         install(new PreFlopSimulatorModule());
 
-        bind(GameHandController.class).in(Singleton.class);
+        bind(AIGameGameHandController.class).in(Singleton.class);
         bind(HandPowerRanker.class).in(Singleton.class);
         bind(StatisticsController.class).in(Singleton.class);
         bind(HandStrengthEvaluator.class).in(Singleton.class);
         bind(EquivalenceClassController.class).in(Singleton.class);
         bind(OpponentModeler.class).in(Singleton.class);
 
-        bind(PlayerControllerPhaseIIIAgressive.class).in(Singleton.class);
-        bind(PlayerControllerPhaseIIIConservative.class).in(Singleton.class);
-
+        bind(PlayerControllerAI.class).in(Singleton.class);
         bind(PlayerControllerHuman.class).in(Singleton.class);
     }
 }

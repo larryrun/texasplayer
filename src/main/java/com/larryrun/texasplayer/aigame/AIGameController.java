@@ -8,21 +8,21 @@ import com.larryrun.texasplayer.model.gameproperties.GameProperties;
 public class AIGameController {
 
     private final Game game;
-    private final GameHandController gameHandController;
+    private final AIGameGameHandController aiGameGameHandController;
 
     @Inject
-    public AIGameController(final GameHandController gameHandController, final GameProperties gameProperties) {
-        this.gameHandController = gameHandController;
+    public AIGameController(final AIGameGameHandController gameHandController, final GameProperties gameProperties) {
+        this.aiGameGameHandController = gameHandController;
 
         game = new Game(gameProperties.getPlayers());
     }
 
     public void play() {
-        gameHandController.play(game);
+        aiGameGameHandController.play(game);
         game.setNextDealer();
     }
 
-    public GameHandController getGameHandController() {
-        return gameHandController;
+    public AIGameGameHandController getAIGameGameHandController() {
+        return aiGameGameHandController;
     }
 }

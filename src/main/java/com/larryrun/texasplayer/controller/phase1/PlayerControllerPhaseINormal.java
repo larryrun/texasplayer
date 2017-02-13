@@ -31,7 +31,7 @@ public class PlayerControllerPhaseINormal extends PlayerController {
             return BettingDecision.raise(-1);
         } else if (card1.getNumber().getPower() + card2.getNumber().getPower() > 16
                 || canCheck(gameHand, player)) {
-            return BettingDecision.CALL;
+            return BettingDecision.call(-1);
         } else {
             return BettingDecision.FOLD;
         }
@@ -44,13 +44,13 @@ public class PlayerControllerPhaseINormal extends PlayerController {
         HandPowerType handPowerType = handPower.getHandPowerType();
         if (handPowerType.equals(HandPowerType.HIGH_CARD)) {
             if (canCheck(gameHand, player)) {
-                return BettingDecision.CALL;
+                return BettingDecision.call(-1);
             }
             return BettingDecision.FOLD;
         } else if (handPowerType.getPower() >= HandPowerType.STRAIGHT.getPower()) {
             return BettingDecision.raise(-1);
         } else {
-            return BettingDecision.CALL;
+            return BettingDecision.call(-1);
         }
     }
 }

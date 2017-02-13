@@ -6,6 +6,7 @@ import com.larryrun.texasplayer.model.Player;
 import com.larryrun.texasplayer.model.cards.Card;
 import com.larryrun.texasplayer.model.cards.Deck;
 import com.larryrun.texasplayer.model.cards.EquivalenceClass;
+import com.larryrun.texasplayer.model.gameproperties.GameProperties;
 
 import java.util.List;
 
@@ -14,9 +15,10 @@ public class GameHandPreFlopRoll extends GameHand {
     private final EquivalenceClass equivalenceClass;
 
     public GameHandPreFlopRoll(final List<Player> players,
+                               final GameProperties gameProperties,
                                final EquivalenceClass equivalenceClass,
                                final GameEventDispatcher gameEventDispatcher) {
-        super(players, gameEventDispatcher);
+        super(players, gameProperties, gameEventDispatcher);
         this.equivalenceClass = equivalenceClass;
     }
 

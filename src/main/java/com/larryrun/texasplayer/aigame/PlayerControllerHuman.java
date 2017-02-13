@@ -7,36 +7,34 @@ import com.larryrun.texasplayer.model.Player;
 import com.larryrun.texasplayer.model.cards.Card;
 
 import java.util.List;
-import java.util.concurrent.SynchronousQueue;
 
 public class PlayerControllerHuman extends PlayerController {
-    private SynchronousQueue<BettingDecision> preFlopBettingDecisionQueue;
-    private SynchronousQueue<BettingDecision> nextAfterFlopBettingDecisionQueue;
+    private BettingDecision nextPreFlopDecision;
+    private BettingDecision nextAfterFlopDecision;
 
     @Override
     protected BettingDecision decidePreFlop(Player player, GameHand gameHand, List<Card> cards) {
-        try {
-            return preFlopBettingDecisionQueue.take();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        return BettingDecision.call(-1);
     }
 
     @Override
     protected BettingDecision decideAfterFlop(Player player, GameHand gameHand, List<Card> cards) {
-        try {
-            return nextAfterFlopBettingDecisionQueue.take();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        return BettingDecision.call(-1);
     }
 
-    public void setPreFlopBettingDecision(BettingDecision bettingDecision) {
-        preFlopBettingDecisionQueue.offer(bettingDecision);
+    public BettingDecision getNextPreFlopDecision() {
+        return nextPreFlopDecision;
     }
 
-    public void setNextAfterFlopBettingDecision(BettingDecision bettingDecision) {
-        nextAfterFlopBettingDecisionQueue.offer(bettingDecision);
+    public void setNextPreFlopDecision(BettingDecision nextPreFlopDecision) {
+        this.nextPreFlopDecision = nextPreFlopDecision;
     }
 
+    public BettingDecision getNextAfterFlopDecision() {
+        return nextAfterFlopDecision;
+    }
+
+    public void setNextAfterFlopDecision(BettingDecision nextAfterFlopDecision) {
+        this.nextAfterFlopDecision = nextAfterFlopDecision;
+    }
 }

@@ -46,7 +46,7 @@ public class GameHandControllerPreFlopRoll extends GameHandController {
     }
 
     private GameHand createGameHand(Game game, EquivalenceClass equivalenceClass) {
-        GameHand gameHand = new GameHandPreFlopRoll(game.getPlayers(), equivalenceClass, gameEventDispatcher);
+        GameHand gameHand = new GameHandPreFlopRoll(game.getPlayers(), gameProperties, equivalenceClass, gameEventDispatcher);
         game.addGameHand(gameHand);
         return gameHand;
     }
