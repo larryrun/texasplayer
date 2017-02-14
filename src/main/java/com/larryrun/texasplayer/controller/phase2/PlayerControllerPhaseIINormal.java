@@ -50,9 +50,9 @@ public class PlayerControllerPhaseIINormal extends PlayerControllerPhaseII {
         double p = calculateCoefficient(gameHand, player);
 
         if (p > 0.8) {
-            return BettingDecision.raise(-1);
+            return BettingDecision.raise(gameHand.getCurrentBettingRound().getHighestBet() + gameHand.getGameProperties().getBigBlind());
         } else if (p > 0.4 || canCheck(gameHand, player)) {
-            return BettingDecision.call(-1);
+            return BettingDecision.call(gameHand.getCurrentBettingRound().getHighestBet());
         }
         return BettingDecision.FOLD;
     }

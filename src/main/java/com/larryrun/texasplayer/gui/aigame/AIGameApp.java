@@ -6,6 +6,7 @@ import com.google.inject.Injector;
 import com.larryrun.texasplayer.aigame.AIGameController;
 import com.larryrun.texasplayer.aigame.AIGameModule;
 import com.larryrun.texasplayer.gui.GUIUtils;
+import com.larryrun.texasplayer.model.BettingDecision;
 import com.larryrun.texasplayer.model.Player;
 import com.larryrun.texasplayer.model.cards.Card;
 import com.larryrun.texasplayer.model.event.*;
@@ -75,7 +76,7 @@ public class AIGameApp extends Application implements GameEventHandler {
         nextHandBtn = new Button("Next Hand");
         nextHandBtn.setOnAction(e -> {
             if(!handStarted) {
-                nextRound();
+                nextHand();
                 nextHandBtn.setDisable(true);
                 handStarted = true;
             }
@@ -111,8 +112,20 @@ public class AIGameApp extends Application implements GameEventHandler {
 
     private void initSelfOpBtn() {
         foldBtn = new Button("FOLD");
+        foldBtn.setOnAction(e -> {
+            gameController.getPlayerControllerHuman().setNextDecision(BettingDecision.FOLD);
+            gameController.getAIGameGameHandController().playHumanMove();
+        });
         callBtn = new Button("CALL");
-        raiseBBBtn = new Button("BB");
+        callBtn.setOnAction(e -> {
+            gameController.getPlayerControllerHuman().setNextDecision(BettingDecision.CALL);
+            gameController.getAIGameGameHandController().playHumanMove();
+        });
+        raiseBBBtn = new Button("1BB");
+        raiseBBBtn.setOnAction(e -> {
+            gameController.getPlayerControllerHuman().setNextDecision(BettingDecision.raise(-1));
+            gameController.getAIGameGameHandController().playHumanMove();
+        });
         raise3BBBtn = new Button("3BB");
         raiseAllBtn = new Button("All IN");
         raiseOKBtn = new Button("RAISE");
@@ -123,17 +136,25 @@ public class AIGameApp extends Application implements GameEventHandler {
         hBox.getChildren().add(callBtn);
 //      only support fixed raise for now
 
-//        hBox.getChildren().add(raiseBBBtn);
+        hBox.getChildren().add(raiseBBBtn);
 //        hBox.getChildren().add(raise3BBBtn);
 //        hBox.getChildren().add(raiseAllBtn);
 //        raiseAmountTextField = new TextField();
 //        raiseAmountTextField.setAlignment(Pos.CENTER_RIGHT);
 //        hBox.getChildren().add(raiseAmountTextField);
-        hBox.getChildren().add(raiseOKBtn);
+//        hBox.getChildren().add(raiseOKBtn);
         outerContainer.getChildren().add(hBox);
     }
 
-    private void nextRound() {
+    private void nextHand() {
+        playerInfoPanes.forEach(playerInfoPane -> {
+            playerInfoPane.setDealer(false);
+            playerInfoPane.setBB(false);
+            playerInfoPane.setSB(false);
+            playerInfoPane.setWinner(false);
+            playerInfoPane.setFrontMoney(0);
+        });
+        publicCardsLabel.setText("");
         gameController.play();
     }
 
@@ -150,11 +171,13 @@ public class AIGameApp extends Application implements GameEventHandler {
                 break;
             case BBTaken.EVENT_NAME:
                 BBTaken bbTaken = (BBTaken) gameEvent;
-                setBB(bbTaken.getPlayer());
+                playerInfoPanes.get(bbTaken.getPlayer().getNumber() - 1).setBB(true);
+                playerInfoPanes.get(bbTaken.getPlayer().getNumber() - 1).addFrontMoney(bbTaken.getAmount());
                 break;
             case SBTaken.EVENT_NAME:
                 SBTaken sbTaken = (SBTaken) gameEvent;
-                setSB(sbTaken.getPlayer());
+                playerInfoPanes.get(sbTaken.getPlayer().getNumber() - 1).setSB(true);
+                playerInfoPanes.get(sbTaken.getPlayer().getNumber() - 1).addFrontMoney(sbTaken.getAmount());
                 break;
             case HoleCardsDealt.EVENT_NAME:
                 HoleCardsDealt holeCardsDealt = (HoleCardsDealt) gameEvent;
@@ -192,22 +215,18 @@ public class AIGameApp extends Application implements GameEventHandler {
                 PlayerBalanceChanged playerBalanceChanged = (PlayerBalanceChanged) gameEvent;
                 playerInfoPanes.get(playerBalanceChanged.getPlayer().getNumber() - 1).setBalance(playerBalanceChanged.getPlayer().getMoney());
                 break;
+            case HandCompleted.EVENT_NAME:
+                HandCompleted handCompleted = (HandCompleted) gameEvent;
+                for(Player winner: handCompleted.getWinners()) {
+                    playerInfoPanes.get(winner.getNumber() - 1).setWinner(true);
+                }
+                nextHandBtn.setDisable(false);
+                break;
         }
     }
 
     private void setDealer(Player player) {
-        playerInfoPanes.forEach(playerInfoPane -> playerInfoPane.setDealer(false));
         playerInfoPanes.get(player.getNumber() - 1).setDealer(true);
-    }
-
-    private void setBB(Player player) {
-        playerInfoPanes.forEach(playerInfoPane -> playerInfoPane.setBB(false));
-        playerInfoPanes.get(player.getNumber() - 1).setBB(true);
-    }
-
-    private void setSB(Player player) {
-        playerInfoPanes.forEach(playerInfoPane -> playerInfoPane.setSB(false));
-        playerInfoPanes.get(player.getNumber() - 1).setSB(true);
     }
 
     private void appendToPublicCardsLabel(List<Card> s) {

@@ -8,6 +8,8 @@ import com.larryrun.texasplayer.controller.opponentmodeling.OpponentModeler;
 import com.larryrun.texasplayer.model.*;
 import com.larryrun.texasplayer.model.cards.Card;
 import com.larryrun.texasplayer.model.event.BBTaken;
+import com.larryrun.texasplayer.model.event.GameHandStarted;
+import com.larryrun.texasplayer.model.event.HandCompleted;
 import com.larryrun.texasplayer.model.event.SBTaken;
 import com.larryrun.texasplayer.model.gameproperties.GameProperties;
 import com.larryrun.texasplayer.utils.Logger;
@@ -42,46 +44,44 @@ public class AIGameGameHandController {
         this.gameEventDispatcher = gameEventDispatcher;
     }
 
+    private GameHand currentGameHand;
     public void play(Game game) {
-        GameHand gameHand = createGameHand(game);
-
-        Boolean haveWinner = false;
-        while (!gameHand.getBettingRoundName().equals(BettingRoundName.POST_RIVER) && !haveWinner) {
-            haveWinner = playRound(gameHand);
-        }
-
-        if (!haveWinner) {
-            showDown(gameHand);
-        }
+        currentGameHand = createGameHand(game);
+        startNewRound();
     }
 
-    protected GameHand createGameHand(Game game) {
+    private GameHand createGameHand(Game game) {
         GameHand gameHand = new GameHand(game.getPlayers(), gameProperties, gameEventDispatcher);
+
+        Player dealer = game.getPlayers().get(0);
+        gameEventDispatcher.fireEvent(new GameHandStarted(dealer));
+
         game.addGameHand(gameHand);
         return gameHand;
     }
 
-    private GameHand currentGameHand;
     private int toPlay;
-    private int turn;
     private int numberOfPlayersAtBeginningOfRound;
-    protected Boolean playRound(GameHand gameHand) {
-        currentGameHand = gameHand;
-        gameHand.nextRound();
 
-        toPlay = gameHand.getPlayersCount();
-        if (gameHand.getBettingRoundName().equals(BettingRoundName.PRE_FLOP)) {
-            takeBlinds(gameHand);
-            toPlay--; // Big blinds don't have to call on himself if no raise :)
-        }
-
+    private int turn;
+    private boolean blindTaken;
+    private void startNewRound() {
+        currentGameHand.nextRound();
+        toPlay = currentGameHand.getPlayersCount();
         turn = 1;
-        numberOfPlayersAtBeginningOfRound = gameHand.getPlayersCount();
-        // Check if we have a winner
-        return false;
+        numberOfPlayersAtBeginningOfRound = currentGameHand.getPlayersCount();
+        blindTaken = false;
+
+        playAIMoveUntilHumanPlayerTurn();
     }
 
-    public void playAIMoveUntilHumanPlayerTurn() {
+    private void playAIMoveUntilHumanPlayerTurn() {
+        if (currentGameHand.getBettingRoundName().equals(BettingRoundName.PRE_FLOP)) {
+            takeBlinds(currentGameHand);
+            toPlay--; // Big blinds don't have to call on himself if no raise :)
+            blindTaken = true;
+        }
+
         while (toPlay > 0) {
             Player player = currentGameHand.getNextPlayer();
 
@@ -93,9 +93,8 @@ public class AIGameGameHandController {
 
             // We can't raise at second turn
             if (turn > numberOfPlayersAtBeginningOfRound && bettingDecision.isRaise()) {
-                bettingDecision = BettingDecision.call(-1);
+                bettingDecision = BettingDecision.call(currentGameHand.getCurrentBettingRound().getHighestBet());
             }
-
 
             // After a raise, every active players after the raiser must play
             if (bettingDecision.isRaise()) {
@@ -103,24 +102,31 @@ public class AIGameGameHandController {
             }
 
             applyDecision(currentGameHand, player, bettingDecision);
-            turn++;
             toPlay--;
         }
 
         if (currentGameHand.getPlayersCount() == 1) {
             Player winner = currentGameHand.getCurrentPlayer();
             winner.addMoney(currentGameHand.getTotalBets());
+
+            gameEventDispatcher.fireEvent(new HandCompleted(winner));
+        }else if(currentGameHand.getBettingRoundName().equals(BettingRoundName.POST_RIVER)) {
+            showDown(currentGameHand);
+        }else if(toPlay == 0){
+            turn++;
+            startNewRound();
         }
+
     }
 
-    public void playerHumanMove() {
+    public void playHumanMove() {
         Player humanPlayer = currentGameHand.getCurrentPlayer();
         PlayerControllerHuman playerControllerHuman = (PlayerControllerHuman) humanPlayer.getPlayerController();
         BettingDecision humanBettingDecision = playerControllerHuman.decide(humanPlayer, currentGameHand);
 
         // We can't raise at second turn
         if (turn > numberOfPlayersAtBeginningOfRound && humanBettingDecision.isRaise()) {
-            humanBettingDecision = BettingDecision.call(-1);
+            humanBettingDecision = BettingDecision.call(currentGameHand.getCurrentBettingRound().getHighestBet());
         }
 
         // After a raise, every active players after the raiser must play
@@ -129,7 +135,6 @@ public class AIGameGameHandController {
         }
 
         applyDecision(currentGameHand, humanPlayer, humanBettingDecision);
-        turn++;
         toPlay--;
 
         playAIMoveUntilHumanPlayerTurn();
@@ -140,10 +145,10 @@ public class AIGameGameHandController {
         Player bigBlindPlayer = gameHand.getNextPlayer();
 
         gameHand.getCurrentBettingRound().placeBet(smallBlindPlayer, gameProperties.getSmallBlind());
-        gameEventDispatcher.fireEvent(new SBTaken(smallBlindPlayer));
+        gameEventDispatcher.fireEvent(new SBTaken(smallBlindPlayer, gameProperties.getSmallBlind()));
 
         gameHand.getCurrentBettingRound().placeBet(bigBlindPlayer, gameProperties.getBigBlind());
-        gameEventDispatcher.fireEvent(new BBTaken(bigBlindPlayer));
+        gameEventDispatcher.fireEvent(new BBTaken(bigBlindPlayer, gameProperties.getBigBlind()));
     }
 
     private void applyDecision(GameHand gameHand, Player player, BettingDecision bettingDecision) {
@@ -188,6 +193,8 @@ public class AIGameGameHandController {
             winner.addMoney(gainAndModulo);
             modulo--;
         }
+
+        gameEventDispatcher.fireEvent(new HandCompleted(winners));
 
         // Opponent modeling
         opponentModeler.save(gameHand);

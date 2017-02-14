@@ -2,6 +2,7 @@ package com.larryrun.texasplayer.model;
 
 public class BettingDecision {
     public final static BettingDecision FOLD = new BettingDecision("FOLD", -1);
+    public final static BettingDecision CALL = new BettingDecision("CALL", -1);
 
     private String action;
     private int amount;
@@ -10,11 +11,6 @@ public class BettingDecision {
         this.amount = amount;
     }
 
-    /**
-     *
-     * @param amount the amount of this raise, please notice that when this amount is < 0, this will be treated as a raise with minimum amount(e.g. one BB)
-     * @return the RAISE BettingDecision
-     */
     public static BettingDecision raise(int amount) {
         return new BettingDecision("RAISE", amount);
     }

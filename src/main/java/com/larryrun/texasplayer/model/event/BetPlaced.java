@@ -23,6 +23,6 @@ public class BetPlaced extends GameEvent {
 
     @Override
     public String eventName() {
-        return null;
+        return EVENT_NAME;
     }
 }

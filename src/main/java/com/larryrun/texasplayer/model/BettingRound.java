@@ -26,13 +26,10 @@ public class BettingRound {
         BettingDecision bettingDecision = contextAction.getBettingDecision();
         Player player = contextAction.getPlayer();
 
-        if(bettingDecision.isCall()) {
-            placeBet(player, highestBet);
-        }else if(bettingDecision.isRaise()) {
+        if(!bettingDecision.isFold()) {
             placeBet(player, bettingDecision.getAmount());
+            gameEventDispatcher.fireEvent(new BetPlaced(player, bettingDecision));
         }
-
-        gameEventDispatcher.fireEvent(new BetPlaced(player, bettingDecision));
 
         // Don't save context information for pre flop
         // Hand strength is always 0 b/c there's no shared cards
@@ -42,6 +39,7 @@ public class BettingRound {
     }
 
     public void placeBet(Player player, int bet) {
+        System.out.println(player.toString() + bet);
         Integer playerBet = playerBets.get(player);
 
         if (playerBet == null) {

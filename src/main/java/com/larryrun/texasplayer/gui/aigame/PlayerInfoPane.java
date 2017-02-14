@@ -4,13 +4,14 @@ import com.larryrun.texasplayer.model.BettingDecision;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 
 public class PlayerInfoPane extends HBox {
     private Label onTurnLabel, dealerLabel, blindLabel, roleLabel, balanceLabel, cardLabel, actionLabel, frontMoneyLabel;
-    private int balance, frontMoney;
+    private int frontMoney;
 
     public PlayerInfoPane(String name, GridPane outerContainer, int rowIdx) {
-        onTurnLabel = new Label(" ");
+        onTurnLabel = new Label();
         dealerLabel = new Label(" ");
         blindLabel = new Label("  ");
         roleLabel = new Label();
@@ -52,13 +53,7 @@ public class PlayerInfoPane extends HBox {
     }
 
     public void setBalance(int balance) {
-        this.balance = balance;
-        balanceLabel.setText(String.format("%d", this.balance));
-    }
-
-    public void addBalance(int amount) {
-        this.balance += amount;
-        balanceLabel.setText(String.format("%d", this.balance));
+        balanceLabel.setText(String.format("%d", balance));
     }
 
     public void setOnTurn(boolean onTurn) {
@@ -85,9 +80,27 @@ public class PlayerInfoPane extends HBox {
     }
 
     public void setSB(boolean sb) {
-        if(sb)
+        if(sb) {
             blindLabel.setText("SB");
-        else
+        } else {
             blindLabel.setText("  ");
+        }
+    }
+
+    public void addFrontMoney(int frontMoney) {
+        this.frontMoney += frontMoney;
+        frontMoneyLabel.setText(String.format("%d", frontMoney));
+    }
+
+    public void setFrontMoney(int frontMoney) {
+        this.frontMoney = frontMoney;
+        frontMoneyLabel.setText(String.format("%d", frontMoney));
+    }
+
+    public void setWinner(boolean winner) {
+        if(winner)
+            roleLabel.setTextFill(Color.RED);
+        else
+            roleLabel.setTextFill(Color.BLACK);
     }
 }

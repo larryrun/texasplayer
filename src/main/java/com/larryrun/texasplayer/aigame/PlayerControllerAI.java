@@ -1,38 +1,51 @@
 package com.larryrun.texasplayer.aigame;
 
+import com.larryrun.texasplayer.controller.EquivalenceClassController;
 import com.larryrun.texasplayer.controller.HandStrengthEvaluator;
 import com.larryrun.texasplayer.controller.PlayerController;
 import com.larryrun.texasplayer.controller.opponentmodeling.OpponentModeler;
-import com.larryrun.texasplayer.controller.phase2.PlayerControllerPhaseIINormal;
-import com.larryrun.texasplayer.model.BettingDecision;
-import com.larryrun.texasplayer.model.BettingRound;
-import com.larryrun.texasplayer.model.GameHand;
-import com.larryrun.texasplayer.model.Player;
+import com.larryrun.texasplayer.model.*;
 import com.larryrun.texasplayer.model.cards.Card;
-import com.larryrun.texasplayer.model.gameproperties.GameProperties;
+import com.larryrun.texasplayer.model.cards.EquivalenceClass;
 import com.larryrun.texasplayer.model.opponentmodeling.ContextAction;
+import com.larryrun.texasplayer.model.opponentmodeling.ContextRaises;
 import com.larryrun.texasplayer.model.opponentmodeling.ModelResult;
+import com.larryrun.texasplayer.persistence.PreFlopPersistence;
 
 import javax.inject.Inject;
 import java.util.List;
 
 public class PlayerControllerAI extends PlayerController {
-    private final PlayerControllerPhaseIINormal playerControllerPhaseIINormal;
     private final HandStrengthEvaluator handStrengthEvaluator;
     private final OpponentModeler opponentModeler;
+    private final EquivalenceClassController equivalenceClassController;
+    private final PreFlopPersistence preFlopPersistence;
+
 
     @Inject
-    public PlayerControllerAI(PlayerControllerPhaseIINormal playerControllerPhaseIINormal,
-                              HandStrengthEvaluator handStrengthEvaluator,
-                              OpponentModeler opponentModeler) {
-        this.playerControllerPhaseIINormal = playerControllerPhaseIINormal;
+    public PlayerControllerAI(
+            final EquivalenceClassController equivalenceClassController,
+            final PreFlopPersistence preFlopPersistence,
+            final HandStrengthEvaluator handStrengthEvaluator,
+            final OpponentModeler opponentModeler) {
         this.handStrengthEvaluator = handStrengthEvaluator;
         this.opponentModeler = opponentModeler;
+        this.equivalenceClassController = equivalenceClassController;
+        this.preFlopPersistence = preFlopPersistence;
     }
 
     @Override
     public BettingDecision decidePreFlop(Player player, GameHand gameHand, List<Card> cards) {
-        return playerControllerPhaseIINormal.decidePreFlop(player, gameHand, cards);
+        Card card1 = cards.get(0);
+        Card card2 = cards.get(1);
+        EquivalenceClass equivalenceClass = this.equivalenceClassController.cards2Equivalence(card1, card2);
+        double percentageOfWins = preFlopPersistence.retrieve(gameHand.getPlayers().size(), equivalenceClass);
+
+        if (percentageOfWins > 0.6)
+            return BettingDecision.raise(gameHand.getCurrentBettingRound().getHighestBet() + gameHand.getGameProperties().getBigBlind());
+        else if (percentageOfWins < 0.45)
+            return BettingDecision.FOLD;
+        return BettingDecision.call(gameHand.getCurrentBettingRound().getHighestBet());
     }
 
     @Override
@@ -64,7 +77,15 @@ public class PlayerControllerAI extends PlayerController {
         // If we don't have enough context action in the current betting round
         if ((double) opponentsModeledCount / gameHand.getPlayersCount() < 0.5) {
             // We fallback to a phase II bot
-            return playerControllerPhaseIINormal.decideAfterFlop(player, gameHand, cards);
+
+            double p = calculateCoefficient(gameHand, player);
+
+            if (p > 0.8) {
+                return BettingDecision.raise(gameHand.getCurrentBettingRound().getHighestBet() + gameHand.getGameProperties().getBigBlind());
+            } else if (p > 0.4 || canCheck(gameHand, player)) {
+                return BettingDecision.call(gameHand.getCurrentBettingRound().getHighestBet());
+            }
+            return BettingDecision.FOLD;
         }
 
         return decideBet(gameHand, player, opponentsWithBetterEstimatedHandStrength, opponentsModeledCount);
@@ -80,5 +101,24 @@ public class PlayerControllerAI extends PlayerController {
         } else {
             return BettingDecision.FOLD;
         }
+    }
+
+    private double calculateCoefficient(GameHand gameHand, Player player) {
+        double p = this.handStrengthEvaluator.evaluate(player.getHoleCards(), gameHand.getSharedCards(),
+                gameHand.getPlayers().size());
+
+        // Decision must depends on the number of players
+        p = p * (1 + gameHand.getPlayersCount() / 20);
+
+        // Last round, why not?
+        if (gameHand.getBettingRoundName().equals(BettingRoundName.POST_RIVER)) {
+            p += 0.3;
+        }
+        // Lot of raises, be careful
+        if (ContextRaises.valueFor(gameHand.getCurrentBettingRound().getNumberOfRaises()).equals(ContextRaises.MANY)) {
+            p -= 0.3;
+        }
+
+        return p;
     }
 }

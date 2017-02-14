@@ -21,6 +21,7 @@ public class AIGameProperties extends GameProperties {
         Player player2 = new Player(2, getInitialMoney(), playerControllerAI, gameEventDispatcher);
         addPlayer(player2);
         Player human = new Player(3, getInitialMoney(), playerControllerHuman, gameEventDispatcher);
+//        Player human = new Player(3, getInitialMoney(), playerControllerAI, gameEventDispatcher);
         addPlayer(human);
     }
 

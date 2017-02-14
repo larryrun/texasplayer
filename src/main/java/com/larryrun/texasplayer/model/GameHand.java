@@ -30,7 +30,6 @@ public class GameHand {
 
         deck = new Deck();
 
-        gameEventDispatcher.fireEvent(new GameHandStarted(players.get(0)));
     }
 
     public void nextRound() {

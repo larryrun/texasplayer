@@ -21,7 +21,6 @@ public class Player {
         this.money = initialMoney;
         this.playerController = playerController;
         this.gameEventDispatcher = gameEventDispatcher;
-
     }
 
     @Override
@@ -67,12 +66,12 @@ public class Player {
 
     public void removeMoney(int amount) {
         money -= amount;
-        this.gameEventDispatcher.fireEvent(new PlayerBalanceChanged(this, -amount));
+        this.gameEventDispatcher.fireEvent(new PlayerBalanceChanged(this, money));
     }
 
     public void addMoney(int amount) {
         money += amount;
-        this.gameEventDispatcher.fireEvent(new PlayerBalanceChanged(this, amount));
+        this.gameEventDispatcher.fireEvent(new PlayerBalanceChanged(this, money));
     }
 
     public void setHoleCards(Card hole1, Card hole2) {
