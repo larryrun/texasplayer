@@ -4,14 +4,24 @@ import com.larryrun.texasplayer.model.Player;
 
 public class GameHandStarted extends GameEvent {
     public static final String EVENT_NAME = "GameHandStarted";
-    private Player dealer;
+    private Player dealer, sb, bb;
 
-    public GameHandStarted(Player dealer) {
+    public GameHandStarted(Player dealer, Player sb, Player bb) {
         this.dealer = dealer;
+        this.sb = sb;
+        this.bb = bb;
     }
 
     public Player getDealer() {
         return dealer;
+    }
+
+    public Player getBb() {
+        return bb;
+    }
+
+    public Player getSb() {
+        return sb;
     }
 
     @Override

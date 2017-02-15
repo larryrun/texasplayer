@@ -34,9 +34,9 @@ public class PlayerControllerPreFlopRoll extends PlayerController {
         if (card1.getNumber().equals(card2.getNumber())) {
             return BettingDecision.raise(gameHand.getCurrentBettingRound().getHighestBet() + gameHand.getGameProperties().getBigBlind());
         } else if (card1.getNumber().getPower() + card2.getNumber().getPower() > 16 || canCheck(gameHand, player)) {
-            return BettingDecision.call(gameHand.getCurrentBettingRound().getHighestBet());
+            return BettingDecision.CALL;
         } else {
-            return BettingDecision.call(gameHand.getCurrentBettingRound().getHighestBet());
+            return BettingDecision.CALL;
         }
     }
 
@@ -47,13 +47,13 @@ public class PlayerControllerPreFlopRoll extends PlayerController {
         HandPowerType handPowerType = handPower.getHandPowerType();
         if (handPowerType.equals(HandPowerType.HIGH_CARD)) {
             if (canCheck(gameHand, player)) {
-                return BettingDecision.call(gameHand.getCurrentBettingRound().getHighestBet());
+                return BettingDecision.CALL;
             }
-            return BettingDecision.call(gameHand.getCurrentBettingRound().getHighestBet());
+            return BettingDecision.CALL;
         } else if (handPowerType.getPower() >= HandPowerType.THREE_OF_A_KIND.getPower()) {
             return BettingDecision.raise(gameHand.getCurrentBettingRound().getHighestBet() + gameHand.getGameProperties().getBigBlind());
         } else {
-            return BettingDecision.call(gameHand.getCurrentBettingRound().getHighestBet());
+            return BettingDecision.CALL;
         }
     }
 }

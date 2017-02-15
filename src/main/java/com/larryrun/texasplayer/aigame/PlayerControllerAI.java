@@ -50,7 +50,8 @@ public class PlayerControllerAI extends PlayerController {
             return BettingDecision.raise(gameHand.getCurrentBettingRound().getHighestBet() + gameHand.getGameProperties().getBigBlind());
         else if (percentageOfWins < 0.45)
             return BettingDecision.FOLD;
-        return BettingDecision.call(gameHand.getCurrentBettingRound().getHighestBet());
+
+        return BettingDecision.CALL;
     }
 
     @Override
@@ -92,7 +93,7 @@ public class PlayerControllerAI extends PlayerController {
             if (p > 0.8) {
                 return BettingDecision.raise(gameHand.getCurrentBettingRound().getHighestBet() + gameHand.getGameProperties().getBigBlind());
             } else if (p > 0.4 || canCheck(gameHand, player)) {
-                return BettingDecision.call(gameHand.getCurrentBettingRound().getHighestBet());
+                return BettingDecision.CALL;
             }
             return BettingDecision.FOLD;
         }
@@ -106,15 +107,14 @@ public class PlayerControllerAI extends PlayerController {
         if ((double) opponentsWithBetterEstimatedHandStrength / opponentsModeledCount > 0.5) {
             return BettingDecision.raise(gameHand.getCurrentBettingRound().getHighestBet() + gameHand.getGameProperties().getBigBlind());
         } else if (canCheck(gameHand, player)) {
-            return BettingDecision.call(gameHand.getCurrentBettingRound().getHighestBet());
+            return BettingDecision.CALL;
         } else {
             return BettingDecision.FOLD;
         }
     }
 
     private double calculateCoefficient(GameHand gameHand, Player player) {
-        double p = this.handStrengthEvaluator.evaluate(player.getHoleCards(), gameHand.getSharedCards(),
-                gameHand.getPlayers().size());
+        double p = this.handStrengthEvaluator.evaluate(player.getHoleCards(), gameHand.getSharedCards(), gameHand.getPlayers().size());
 
         // Decision must depends on the number of players
         p = p * (1 + gameHand.getPlayersCount() / 20);

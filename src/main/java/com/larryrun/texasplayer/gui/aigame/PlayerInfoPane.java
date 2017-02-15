@@ -7,8 +7,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 
 public class PlayerInfoPane extends HBox {
-    private Label onTurnLabel, dealerLabel, blindLabel, roleLabel, balanceLabel, cardLabel, actionLabel, frontMoneyLabel;
-    private int frontMoney;
+    private Label onTurnLabel, dealerLabel, blindLabel, roleLabel, balanceLabel, cardLabel, actionLabel, betMoneyLabel, winLabel;
+    private int betMoney;
 
     public PlayerInfoPane(String name, GridPane outerContainer, int rowIdx) {
         onTurnLabel = new Label();
@@ -18,8 +18,9 @@ public class PlayerInfoPane extends HBox {
         Label playerNameLabel = new Label(name);
         balanceLabel = new Label();
         cardLabel = new Label("       ");
-        actionLabel = new Label();
-        frontMoneyLabel = new Label();
+        actionLabel = new Label("     ");
+        betMoneyLabel = new Label();
+        winLabel = new Label("   ");
 
         int columnIdx = 0;
         outerContainer.add(onTurnLabel, columnIdx++, rowIdx);
@@ -30,21 +31,17 @@ public class PlayerInfoPane extends HBox {
         outerContainer.add(balanceLabel, columnIdx++, rowIdx);
         outerContainer.add(cardLabel, columnIdx++, rowIdx);
         outerContainer.add(actionLabel, columnIdx++, rowIdx);
-        outerContainer.add(frontMoneyLabel, columnIdx, rowIdx);
+        outerContainer.add(betMoneyLabel, columnIdx++, rowIdx);
+        outerContainer.add(winLabel, columnIdx, rowIdx);
     }
 
     public void showBettingDecision(BettingDecision bettingDecision) {
         if(bettingDecision.isCall()) {
             actionLabel.setText("CALL");
-            frontMoney += bettingDecision.getAmount();
-            frontMoneyLabel.setText(String.format("%d", frontMoney));
         }else if(bettingDecision.isRaise()) {
             actionLabel.setText("RAISE");
-            frontMoney += bettingDecision.getAmount();
-            frontMoneyLabel.setText(String.format("%d", frontMoney));
         }else {
             actionLabel.setText("FOLD");
-            frontMoneyLabel.setText("");
         }
     }
 
@@ -57,7 +54,12 @@ public class PlayerInfoPane extends HBox {
     }
 
     public void setOnTurn(boolean onTurn) {
-        onTurnLabel.setText(onTurn? ">": " ");
+        if(onTurn) {
+            onTurnLabel.setText(">");
+            actionLabel.setText("     ");
+        }else {
+            onTurnLabel.setText(" ");
+        }
     }
 
     public void setHoleCardInfo(String cardInfo) {
@@ -87,20 +89,20 @@ public class PlayerInfoPane extends HBox {
         }
     }
 
-    public void addFrontMoney(int frontMoney) {
-        this.frontMoney += frontMoney;
-        frontMoneyLabel.setText(String.format("%d", frontMoney));
+    public void addBetMoney(int betMoney) {
+        this.betMoney += betMoney;
+        betMoneyLabel.setText(String.format("%d", this.betMoney));
     }
 
-    public void setFrontMoney(int frontMoney) {
-        this.frontMoney = frontMoney;
-        frontMoneyLabel.setText(String.format("%d", frontMoney));
+    public void setBetMoney(int betMoney) {
+        this.betMoney = betMoney;
+        betMoneyLabel.setText(String.format("%d", this.betMoney));
     }
 
     public void setWinner(boolean winner) {
         if(winner)
-            roleLabel.setTextFill(Color.RED);
+            winLabel.setText("WIN");
         else
-            roleLabel.setTextFill(Color.BLACK);
+            winLabel.setText("   ");
     }
 }

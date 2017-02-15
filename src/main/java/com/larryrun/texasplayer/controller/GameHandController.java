@@ -78,7 +78,7 @@ public class GameHandController {
 
             // We can't raise at second turn
             if (turn > numberOfPlayersAtBeginningOfRound && bettingDecision.isRaise()) {
-                bettingDecision = BettingDecision.call(-1);
+                bettingDecision = BettingDecision.CALL;
             }
 
             // After a raise, every active players after the raiser must play

@@ -15,10 +15,6 @@ public class BettingDecision {
         return new BettingDecision("RAISE", amount);
     }
 
-    public static BettingDecision call(int amount) {
-        return new BettingDecision("CALL", amount);
-    }
-
     public boolean isCall() {
         return "CALL".equalsIgnoreCase(action);
     }

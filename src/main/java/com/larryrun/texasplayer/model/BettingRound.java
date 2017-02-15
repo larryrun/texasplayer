@@ -26,10 +26,13 @@ public class BettingRound {
         BettingDecision bettingDecision = contextAction.getBettingDecision();
         Player player = contextAction.getPlayer();
 
-        if(!bettingDecision.isFold()) {
+        if(bettingDecision.isRaise()) {
             placeBet(player, bettingDecision.getAmount());
-            gameEventDispatcher.fireEvent(new BetPlaced(player, bettingDecision));
+        }else if(bettingDecision.isCall()) {
+            placeBet(player, highestBet);
+
         }
+
 
         // Don't save context information for pre flop
         // Hand strength is always 0 b/c there's no shared cards
@@ -39,24 +42,24 @@ public class BettingRound {
     }
 
     public void placeBet(Player player, int bet) {
-        System.out.println(player.toString() + bet);
         Integer playerBet = playerBets.get(player);
 
+        int betAmount;
         if (playerBet == null) {
-            player.removeMoney(bet);
+            betAmount = bet;
         } else {
-            player.removeMoney(bet - playerBet);
+            betAmount = bet - playerBet;
         }
+        player.removeMoney(betAmount);
 
         if (bet > highestBet) {
             highestBet = bet;
-
         } else if (bet < highestBet) {
-            throw new IllegalArgumentException(
-                    "You can't bet less than the higher bet");
+            throw new IllegalArgumentException("You can't bet less than the higher bet");
         }
 
         playerBets.put(player, bet);
+        gameEventDispatcher.fireEvent(new BetPlaced(player, betAmount));
     }
 
     public int getHighestBet() {

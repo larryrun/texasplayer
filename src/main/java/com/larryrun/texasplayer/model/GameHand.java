@@ -92,9 +92,7 @@ public class GameHand {
     }
 
     public void removeCurrentPlayer() {
-        Player removed = players.removeFirst();
-        gameEventDispatcher.fireEvent(new PlayerOffTable(removed));
-
+        players.removeFirst();
         hasRemoved = true;
     }
 
@@ -149,7 +147,9 @@ public class GameHand {
 
         currentBettingRound.applyDecision(contextInformation, gameProperties);
 
-        if (bettingDecision.equals(BettingDecision.FOLD)) {
+        gameEventDispatcher.fireEvent(new DecisionMade(getCurrentPlayer(), bettingDecision));
+
+        if (bettingDecision.isFold()) {
             removeCurrentPlayer();
         }
     }

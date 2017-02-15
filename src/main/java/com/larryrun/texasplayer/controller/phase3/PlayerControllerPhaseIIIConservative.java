@@ -29,7 +29,7 @@ public class PlayerControllerPhaseIIIConservative extends PlayerControllerPhaseI
         if (oppponentsWithBetterEstimatedHandStrength == 0) {
             return BettingDecision.raise(-1);
         } else if (canCheck(gameHand, player)) {
-            return BettingDecision.call(-1);
+            return BettingDecision.CALL;
         } else {
             return BettingDecision.FOLD;
         }

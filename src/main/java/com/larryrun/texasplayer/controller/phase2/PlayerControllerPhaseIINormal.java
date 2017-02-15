@@ -42,7 +42,7 @@ public class PlayerControllerPhaseIINormal extends PlayerControllerPhaseII {
             return BettingDecision.raise(-1);
         else if (percentageOfWins < 0.45)
             return BettingDecision.FOLD;
-        return BettingDecision.call(-1);
+        return BettingDecision.CALL;
     }
 
     @Override
@@ -52,7 +52,7 @@ public class PlayerControllerPhaseIINormal extends PlayerControllerPhaseII {
         if (p > 0.8) {
             return BettingDecision.raise(gameHand.getCurrentBettingRound().getHighestBet() + gameHand.getGameProperties().getBigBlind());
         } else if (p > 0.4 || canCheck(gameHand, player)) {
-            return BettingDecision.call(gameHand.getCurrentBettingRound().getHighestBet());
+            return BettingDecision.CALL;
         }
         return BettingDecision.FOLD;
     }

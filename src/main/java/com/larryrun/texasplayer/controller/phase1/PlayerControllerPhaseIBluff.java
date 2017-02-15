@@ -32,7 +32,7 @@ public class PlayerControllerPhaseIBluff extends PlayerController {
             return BettingDecision.raise(-1);
         } else {
             if (sumPower > 16 || canCheck(gameHand, player)) {
-                return BettingDecision.call(-1);
+                return BettingDecision.CALL;
             } else {
                 return BettingDecision.FOLD;
             }
@@ -51,7 +51,7 @@ public class PlayerControllerPhaseIBluff extends PlayerController {
             return BettingDecision.raise(-1);
         } else {
             if(canCheck(gameHand, player)){
-                return BettingDecision.call(-1);
+                return BettingDecision.CALL;
             }
             return BettingDecision.FOLD;
         }

@@ -16,7 +16,7 @@ public class PlayerControllerHuman extends PlayerController {
     protected BettingDecision decidePreFlop(Player player, GameHand gameHand, List<Card> cards) {
         AssertUtils.notNull(nextDecision, "nextDecision");
 
-        decideAmount(gameHand);
+        decideAmount(player, gameHand);
         return nextDecision;
     }
 
@@ -24,7 +24,7 @@ public class PlayerControllerHuman extends PlayerController {
     protected BettingDecision decideAfterFlop(Player player, GameHand gameHand, List<Card> cards) {
         AssertUtils.notNull(nextDecision, "nextDecision");
 
-        decideAmount(gameHand);
+        decideAmount(player, gameHand);
         return nextDecision;
     }
 
@@ -32,9 +32,10 @@ public class PlayerControllerHuman extends PlayerController {
         this.nextDecision = nextDecision;
     }
 
-    private void decideAmount(GameHand gameHand) {
+    private void decideAmount(Player player, GameHand gameHand) {
         if(nextDecision.isCall()) {
-            nextDecision = BettingDecision.call(gameHand.getCurrentBettingRound().getHighestBet());
+            int callAmount = gameHand.getCurrentBettingRound().getHighestBet() - gameHand.getCurrentBettingRound().getBetForPlayer(player);
+            nextDecision = BettingDecision.CALL;
         }else if(nextDecision.isRaise()) {
             nextDecision = BettingDecision.raise(gameHand.getCurrentBettingRound().getHighestBet() + gameHand.getGameProperties().getBigBlind());
         }

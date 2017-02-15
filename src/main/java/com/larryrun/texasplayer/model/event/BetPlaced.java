@@ -1,24 +1,23 @@
 package com.larryrun.texasplayer.model.event;
 
-import com.larryrun.texasplayer.model.BettingDecision;
 import com.larryrun.texasplayer.model.Player;
 
 public class BetPlaced extends GameEvent {
     public static final String EVENT_NAME = "BetPlaced";
     private Player player;
-    private BettingDecision bettingDecision;
+    private int amount;
 
-    public BetPlaced(Player player, BettingDecision bettingDecision) {
+    public BetPlaced(Player player, int amount) {
         this.player = player;
-        this.bettingDecision = bettingDecision;
+        this.amount = amount;
     }
 
     public Player getPlayer() {
         return player;
     }
 
-    public BettingDecision getBettingDecision() {
-        return bettingDecision;
+    public int getAmount() {
+        return amount;
     }
 
     @Override

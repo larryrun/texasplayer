@@ -50,8 +50,15 @@ public class AIGameGameHandController {
     private GameHand createGameHand(Game game) {
         GameHand gameHand = new GameHand(game.getPlayers(), gameProperties, gameEventDispatcher);
 
-        Player dealer = game.getPlayers().get(0);
-        gameEventDispatcher.fireEvent(new GameHandStarted(dealer));
+        Player dealer = game.getPlayers().get(0),
+                sb = game.getPlayers().get(1),
+                bb;
+        if(game.getPlayers().size() == 2) {
+            bb = dealer;
+        }else {
+            bb = game.getPlayers().get(2);
+        }
+        gameEventDispatcher.fireEvent(new GameHandStarted(dealer, bb, sb));
 
         game.addGameHand(gameHand);
         return gameHand;
@@ -88,15 +95,16 @@ public class AIGameGameHandController {
 
             // We can't raise at second turn
             if (turn > numberOfPlayersAtBeginningOfRound && bettingDecision.isRaise()) {
-                bettingDecision = BettingDecision.call(currentGameHand.getCurrentBettingRound().getHighestBet());
+                bettingDecision = BettingDecision.CALL;
             }
 
             // After a raise, every active players after the raiser must play
             if (bettingDecision.isRaise()) {
-                toPlay = currentGameHand.getPlayersCount() - 1;
+                toPlay = currentGameHand.getPlayersCount();
             }
 
             applyDecision(currentGameHand, player, bettingDecision);
+            turn++;
             toPlay--;
         }
 
@@ -104,14 +112,12 @@ public class AIGameGameHandController {
             Player winner = currentGameHand.getCurrentPlayer();
             winner.addMoney(currentGameHand.getTotalBets());
 
-            gameEventDispatcher.fireEvent(new HandCompleted(winner));
+            gameEventDispatcher.fireEvent(new HandCompleted(winner, false));
         }else if(currentGameHand.getBettingRoundName().equals(BettingRoundName.POST_RIVER)) {
             showDown(currentGameHand);
         }else if(toPlay == 0){
-            turn++;
             startNewRound();
         }
-
     }
 
     public void playHumanMove() {
@@ -121,16 +127,17 @@ public class AIGameGameHandController {
 
         // We can't raise at second turn
         if (turn > numberOfPlayersAtBeginningOfRound && humanBettingDecision.isRaise()) {
-            humanBettingDecision = BettingDecision.call(currentGameHand.getCurrentBettingRound().getHighestBet());
+            humanBettingDecision = BettingDecision.CALL;
         }
 
         // After a raise, every active players after the raiser must play
         if (humanBettingDecision.isRaise()) {
-            toPlay = currentGameHand.getPlayersCount() - 1;
+            toPlay = currentGameHand.getPlayersCount();
         }
 
         applyDecision(currentGameHand, humanPlayer, humanBettingDecision);
         toPlay--;
+        turn++;
 
         playAIMoveUntilHumanPlayerTurn();
     }
@@ -140,10 +147,7 @@ public class AIGameGameHandController {
         Player bigBlindPlayer = gameHand.getNextPlayer();
 
         gameHand.getCurrentBettingRound().placeBet(smallBlindPlayer, gameProperties.getSmallBlind());
-        gameEventDispatcher.fireEvent(new SBTaken(smallBlindPlayer, gameProperties.getSmallBlind()));
-
         gameHand.getCurrentBettingRound().placeBet(bigBlindPlayer, gameProperties.getBigBlind());
-        gameEventDispatcher.fireEvent(new BBTaken(bigBlindPlayer, gameProperties.getBigBlind()));
     }
 
     private void applyDecision(GameHand gameHand, Player player, BettingDecision bettingDecision) {
@@ -189,7 +193,7 @@ public class AIGameGameHandController {
             modulo--;
         }
 
-        gameEventDispatcher.fireEvent(new HandCompleted(winners));
+        gameEventDispatcher.fireEvent(new HandCompleted(winners, true));
 
         // Opponent modeling
         opponentModeler.save(gameHand);
