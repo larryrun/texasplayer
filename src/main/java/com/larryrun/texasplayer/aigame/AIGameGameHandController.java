@@ -7,10 +7,7 @@ import com.larryrun.texasplayer.controller.StatisticsController;
 import com.larryrun.texasplayer.controller.opponentmodeling.OpponentModeler;
 import com.larryrun.texasplayer.model.*;
 import com.larryrun.texasplayer.model.cards.Card;
-import com.larryrun.texasplayer.model.event.BBTaken;
-import com.larryrun.texasplayer.model.event.GameHandStarted;
-import com.larryrun.texasplayer.model.event.HandCompleted;
-import com.larryrun.texasplayer.model.event.SBTaken;
+import com.larryrun.texasplayer.model.event.*;
 import com.larryrun.texasplayer.model.gameproperties.GameProperties;
 import com.larryrun.texasplayer.utils.Logger;
 
@@ -64,27 +61,25 @@ public class AIGameGameHandController {
     private int numberOfPlayersAtBeginningOfRound;
 
     private int turn;
-    private boolean blindTaken;
     private void startNewRound() {
         currentGameHand.nextRound();
         toPlay = currentGameHand.getPlayersCount();
         turn = 1;
         numberOfPlayersAtBeginningOfRound = currentGameHand.getPlayersCount();
-        blindTaken = false;
+
+        if (currentGameHand.getBettingRoundName().equals(BettingRoundName.PRE_FLOP)) {
+            takeBlinds(currentGameHand);
+            toPlay--; // Big blinds don't have to call on himself if no raise :)
+        }
 
         playAIMoveUntilHumanPlayerTurn();
     }
 
     private void playAIMoveUntilHumanPlayerTurn() {
-        if (currentGameHand.getBettingRoundName().equals(BettingRoundName.PRE_FLOP)) {
-            takeBlinds(currentGameHand);
-            toPlay--; // Big blinds don't have to call on himself if no raise :)
-            blindTaken = true;
-        }
-
         while (toPlay > 0) {
             Player player = currentGameHand.getNextPlayer();
 
+            gameEventDispatcher.fireEvent(new PlayerOnTurn(player));
             if(player.isHumanPlayer()) {
                 break;
             }

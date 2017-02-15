@@ -25,6 +25,7 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javafx.application.Platform;
 
 public class AIGameApp extends Application implements GameEventHandler {
     private AIGameController gameController;
@@ -49,7 +50,8 @@ public class AIGameApp extends Application implements GameEventHandler {
 
             initGame();
 
-            Scene scene = new Scene(outerContainer, 1024, 800);
+
+            Scene scene = new Scene(outerContainer, 800, 600);
             primaryStage.setScene(scene);
             scene.getStylesheets().add(ClassLoader.getSystemResource("style/css/AppMain.css").toExternalForm());
             primaryStage.show();
@@ -153,9 +155,10 @@ public class AIGameApp extends Application implements GameEventHandler {
             playerInfoPane.setSB(false);
             playerInfoPane.setWinner(false);
             playerInfoPane.setFrontMoney(0);
+            playerInfoPane.setOnTurn(false);
         });
         publicCardsLabel.setText("");
-        gameController.play();
+        new Thread(() -> gameController.play()).start();
     }
 
     private PlayerInfoPane getHumanPlayerInfoPane() {
@@ -164,65 +167,67 @@ public class AIGameApp extends Application implements GameEventHandler {
 
     @Override
     public void handleGameEvent(GameEvent gameEvent) {
-        switch (gameEvent.eventName()) {
-            case GameHandStarted.EVENT_NAME:
-                GameHandStarted gameHandStarted = (GameHandStarted)gameEvent;
-                setDealer(gameHandStarted.getDealer());
-                break;
-            case BBTaken.EVENT_NAME:
-                BBTaken bbTaken = (BBTaken) gameEvent;
-                playerInfoPanes.get(bbTaken.getPlayer().getNumber() - 1).setBB(true);
-                playerInfoPanes.get(bbTaken.getPlayer().getNumber() - 1).addFrontMoney(bbTaken.getAmount());
-                break;
-            case SBTaken.EVENT_NAME:
-                SBTaken sbTaken = (SBTaken) gameEvent;
-                playerInfoPanes.get(sbTaken.getPlayer().getNumber() - 1).setSB(true);
-                playerInfoPanes.get(sbTaken.getPlayer().getNumber() - 1).addFrontMoney(sbTaken.getAmount());
-                break;
-            case HoleCardsDealt.EVENT_NAME:
-                HoleCardsDealt holeCardsDealt = (HoleCardsDealt) gameEvent;
-                if(holeCardsDealt.getPlayer().isHumanPlayer()) {
-                    getHumanPlayerInfoPane().setHoleCardInfo(holeCardsDealt.getCards().get(0) + " " + holeCardsDealt.getCards().get(1));
-                }else {
-                    playerInfoPanes.get(holeCardsDealt.getPlayer().getNumber() - 1).setHoleCardInfo("--- ---");
-                }
-                break;
-            case FlopCardsDealt.EVENT_NAME:
-                FlopCardsDealt flopCardsDealt = (FlopCardsDealt) gameEvent;
-                appendToPublicCardsLabel(flopCardsDealt.getCards());
-                break;
-            case TurnCardDealt.EVENT_NAME:
-                TurnCardDealt turnCardDealt = (TurnCardDealt) gameEvent;
-                appendToPublicCardsLabel(Collections.singletonList(turnCardDealt.getCard()));
-                break;
-            case RiverCardDealt.EVENT_NAME:
-                RiverCardDealt riverCardDealt = (RiverCardDealt) gameEvent;
-                appendToPublicCardsLabel(Collections.singletonList(riverCardDealt.getCard()));
-                break;
-            case PlayerOnTurn.EVENT_NAME:
-                PlayerOnTurn playerOnTurn = (PlayerOnTurn) gameEvent;
-                setPlayerOnTurn(playerOnTurn.getPlayer());
-                break;
-            case BetPlaced.EVENT_NAME:
-                BetPlaced betPlaced = (BetPlaced) gameEvent;
-                playerInfoPanes.get(betPlaced.getPlayer().getNumber() - 1).showBettingDecision(betPlaced.getBettingDecision());
-                break;
-            case PlayerCreated.EVENT_NAME:
-                PlayerCreated playerCreated = (PlayerCreated) gameEvent;
-                playerInfoPanes.get(playerCreated.getPlayer().getNumber() - 1).setBalance(playerCreated.getPlayer().getMoney());
-                break;
-            case PlayerBalanceChanged.EVENT_NAME:
-                PlayerBalanceChanged playerBalanceChanged = (PlayerBalanceChanged) gameEvent;
-                playerInfoPanes.get(playerBalanceChanged.getPlayer().getNumber() - 1).setBalance(playerBalanceChanged.getPlayer().getMoney());
-                break;
-            case HandCompleted.EVENT_NAME:
-                HandCompleted handCompleted = (HandCompleted) gameEvent;
-                for(Player winner: handCompleted.getWinners()) {
-                    playerInfoPanes.get(winner.getNumber() - 1).setWinner(true);
-                }
-                nextHandBtn.setDisable(false);
-                break;
-        }
+        Platform.runLater(()->{
+            switch (gameEvent.eventName()) {
+                case GameHandStarted.EVENT_NAME:
+                    GameHandStarted gameHandStarted = (GameHandStarted)gameEvent;
+                    setDealer(gameHandStarted.getDealer());
+                    break;
+                case BBTaken.EVENT_NAME:
+                    BBTaken bbTaken = (BBTaken) gameEvent;
+                    playerInfoPanes.get(bbTaken.getPlayer().getNumber() - 1).setBB(true);
+                    playerInfoPanes.get(bbTaken.getPlayer().getNumber() - 1).addFrontMoney(bbTaken.getAmount());
+                    break;
+                case SBTaken.EVENT_NAME:
+                    SBTaken sbTaken = (SBTaken) gameEvent;
+                    playerInfoPanes.get(sbTaken.getPlayer().getNumber() - 1).setSB(true);
+                    playerInfoPanes.get(sbTaken.getPlayer().getNumber() - 1).addFrontMoney(sbTaken.getAmount());
+                    break;
+                case HoleCardsDealt.EVENT_NAME:
+                    HoleCardsDealt holeCardsDealt = (HoleCardsDealt) gameEvent;
+                    if(holeCardsDealt.getPlayer().isHumanPlayer()) {
+                        getHumanPlayerInfoPane().setHoleCardInfo(holeCardsDealt.getCards().get(0) + " " + holeCardsDealt.getCards().get(1));
+                    }else {
+                        playerInfoPanes.get(holeCardsDealt.getPlayer().getNumber() - 1).setHoleCardInfo("--- ---");
+                    }
+                    break;
+                case FlopCardsDealt.EVENT_NAME:
+                    FlopCardsDealt flopCardsDealt = (FlopCardsDealt) gameEvent;
+                    appendToPublicCardsLabel(flopCardsDealt.getCards());
+                    break;
+                case TurnCardDealt.EVENT_NAME:
+                    TurnCardDealt turnCardDealt = (TurnCardDealt) gameEvent;
+                    appendToPublicCardsLabel(Collections.singletonList(turnCardDealt.getCard()));
+                    break;
+                case RiverCardDealt.EVENT_NAME:
+                    RiverCardDealt riverCardDealt = (RiverCardDealt) gameEvent;
+                    appendToPublicCardsLabel(Collections.singletonList(riverCardDealt.getCard()));
+                    break;
+                case PlayerOnTurn.EVENT_NAME:
+                    PlayerOnTurn playerOnTurn = (PlayerOnTurn) gameEvent;
+                    setPlayerOnTurn(playerOnTurn.getPlayer());
+                    break;
+                case BetPlaced.EVENT_NAME:
+                    BetPlaced betPlaced = (BetPlaced) gameEvent;
+                    playerInfoPanes.get(betPlaced.getPlayer().getNumber() - 1).showBettingDecision(betPlaced.getBettingDecision());
+                    break;
+                case PlayerCreated.EVENT_NAME:
+                    PlayerCreated playerCreated = (PlayerCreated) gameEvent;
+                    playerInfoPanes.get(playerCreated.getPlayer().getNumber() - 1).setBalance(playerCreated.getPlayer().getMoney());
+                    break;
+                case PlayerBalanceChanged.EVENT_NAME:
+                    PlayerBalanceChanged playerBalanceChanged = (PlayerBalanceChanged) gameEvent;
+                    playerInfoPanes.get(playerBalanceChanged.getPlayer().getNumber() - 1).setBalance(playerBalanceChanged.getPlayer().getMoney());
+                    break;
+                case HandCompleted.EVENT_NAME:
+                    HandCompleted handCompleted = (HandCompleted) gameEvent;
+                    for(Player winner: handCompleted.getWinners()) {
+                        playerInfoPanes.get(winner.getNumber() - 1).setWinner(true);
+                    }
+                    nextHandBtn.setDisable(false);
+                    break;
+            }
+        });
     }
 
     private void setDealer(Player player) {

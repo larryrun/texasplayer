@@ -14,6 +14,7 @@ import com.larryrun.texasplayer.persistence.PreFlopPersistence;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class PlayerControllerAI extends PlayerController {
     private final HandStrengthEvaluator handStrengthEvaluator;
@@ -36,6 +37,10 @@ public class PlayerControllerAI extends PlayerController {
 
     @Override
     public BettingDecision decidePreFlop(Player player, GameHand gameHand, List<Card> cards) {
+        try {
+            TimeUnit.MILLISECONDS.sleep(1000);
+        }catch (InterruptedException e){}
+
         Card card1 = cards.get(0);
         Card card2 = cards.get(1);
         EquivalenceClass equivalenceClass = this.equivalenceClassController.cards2Equivalence(card1, card2);
@@ -50,6 +55,10 @@ public class PlayerControllerAI extends PlayerController {
 
     @Override
     public BettingDecision decideAfterFlop(Player player, GameHand gameHand, List<Card> cards) {
+        try {
+            TimeUnit.MILLISECONDS.sleep(1000);
+        }catch (InterruptedException e){}
+
         BettingRound currentBettingRound = gameHand.getCurrentBettingRound();
         double handStrength = handStrengthEvaluator.evaluate(player.getHoleCards(), gameHand.getSharedCards(), gameHand.getPlayersCount());
         int opponentsModeledCount = 0;

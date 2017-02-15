@@ -57,7 +57,7 @@ public class PlayerInfoPane extends HBox {
     }
 
     public void setOnTurn(boolean onTurn) {
-        onTurnLabel.setText(onTurn?">": " ");
+        onTurnLabel.setText(onTurn? ">": " ");
     }
 
     public void setHoleCardInfo(String cardInfo) {
