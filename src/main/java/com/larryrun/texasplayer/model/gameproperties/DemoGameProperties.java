@@ -18,9 +18,9 @@ public class DemoGameProperties extends GameProperties {
                               final GameEventDispatcher gameEventDispatcher) {
         super(15, 1000, 20, 10, gameEventDispatcher);
 
-        addPlayer(new Player(1, getInitialMoney(), playerControllerPhaseIIBluff, gameEventDispatcher));
-        addPlayer(new Player(2, getInitialMoney(), playerControllerPhaseIINormal, gameEventDispatcher));
-        addPlayer(new Player(3, getInitialMoney(), playerControllerPhaseIIIAgressive, gameEventDispatcher));
-        addPlayer(new Player(4, getInitialMoney(), playerControllerPhaseIIIConservative, gameEventDispatcher));
+        addPlayer(new Player("player1", 1, getInitialMoney(), playerControllerPhaseIIBluff, gameEventDispatcher));
+        addPlayer(new Player("player2", 2, getInitialMoney(), playerControllerPhaseIINormal, gameEventDispatcher));
+        addPlayer(new Player("player3",3, getInitialMoney(), playerControllerPhaseIIIAgressive, gameEventDispatcher));
+        addPlayer(new Player("player4", 4, getInitialMoney(), playerControllerPhaseIIIConservative, gameEventDispatcher));
     }
 }

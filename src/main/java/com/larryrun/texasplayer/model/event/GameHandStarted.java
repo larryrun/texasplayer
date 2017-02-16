@@ -16,11 +16,11 @@ public class GameHandStarted extends GameEvent {
         return dealer;
     }
 
-    public Player getBb() {
+    public Player getBbPlayer() {
         return bb;
     }
 
-    public Player getSb() {
+    public Player getSbPlayer() {
         return sb;
     }
 

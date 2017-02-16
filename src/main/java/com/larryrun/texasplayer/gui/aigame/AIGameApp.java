@@ -13,6 +13,7 @@ import com.larryrun.texasplayer.model.event.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -28,8 +29,9 @@ import java.util.stream.Stream;
 public class AIGameApp extends Application implements GameEventHandler {
     private AIGameController gameController;
 
-    private List<PlayerInfoPane> playerInfoPanes;
+    private Map<String, PlayerInfoPane> playerInfoPaneMap;
     private VBox outerContainer;
+    private GridPane playerInfoGridPane;
     private boolean handStarted;
     private Button nextHandBtn;
     private Button foldBtn, callBtn, raiseBBBtn, raise3BBBtn, raiseAllBtn, raiseOKBtn;
@@ -48,7 +50,6 @@ public class AIGameApp extends Application implements GameEventHandler {
 
             initGame();
 
-
             Scene scene = new Scene(outerContainer, 600, 450);
             primaryStage.setScene(scene);
             scene.getStylesheets().add(ClassLoader.getSystemResource("style/css/AppMain.css").toExternalForm());
@@ -60,7 +61,7 @@ public class AIGameApp extends Application implements GameEventHandler {
 
     private void initGame() {
         outerContainer.getChildren().clear();
-        playerInfoPanes = new ArrayList<>();
+        playerInfoPaneMap = new HashMap<>();
         handStarted = false;
 
         initGameOpBtn();
@@ -91,19 +92,11 @@ public class AIGameApp extends Application implements GameEventHandler {
     }
 
     private void initPlayerInfoPanes() {
-        GridPane gridPane = new GridPane();
-        gridPane.setHgap(10);
-        gridPane.setVgap(5);
-        int row = 0;
-        for(; row < 2; row++) {
-            PlayerInfoPane infoPane = new PlayerInfoPane("player" + (row + 1), gridPane, row);
-            playerInfoPanes.add(infoPane);
-        }
+        playerInfoGridPane = new GridPane();
+        playerInfoGridPane.setHgap(10);
+        playerInfoGridPane.setVgap(5);
 
-        PlayerInfoPane selfInfoPane = new PlayerInfoPane("self", gridPane, row);
-        playerInfoPanes.add(selfInfoPane);
-
-        outerContainer.getChildren().add(gridPane);
+        outerContainer.getChildren().add(playerInfoGridPane);
     }
 
     private void initSharedCardsInfo() {
@@ -114,32 +107,48 @@ public class AIGameApp extends Application implements GameEventHandler {
 
     private void initSelfOpBtn() {
         foldBtn = new Button("FOLD");
-        foldBtn.setOnAction(e -> {
-            runInNewThread(() -> {
-                disableActionControls();
-                gameController.getPlayerControllerHuman().setNextDecision(BettingDecision.FOLD);
-                gameController.getAIGameGameHandController().playHumanMove();
-            });
-        });
+        foldBtn.setOnAction(e ->
+                runInNewThread(() -> {
+                    disableActionControls();
+                    gameController.getPlayerControllerHuman().setNextDecisionToFold();
+                    gameController.getAIGameGameHandController().playHumanMove();
+                })
+        );
         callBtn = new Button("CALL");
-        callBtn.setOnAction(e -> {
-            runInNewThread(() -> {
-                disableActionControls();
-                gameController.getPlayerControllerHuman().setNextDecision(BettingDecision.CALL);
-                gameController.getAIGameGameHandController().playHumanMove();
-            });
-        });
+        callBtn.setOnAction(e ->
+                runInNewThread(() -> {
+                    disableActionControls();
+                    gameController.getPlayerControllerHuman().setNextDecisionToCall();
+                    gameController.getAIGameGameHandController().playHumanMove();
+                })
+        );
         raiseBBBtn = new Button("1BB");
-        raiseBBBtn.setOnAction(e -> {
-            runInNewThread(() -> {
-                disableActionControls();
-                gameController.getPlayerControllerHuman().setNextDecision(BettingDecision.raise(-1));
-                gameController.getAIGameGameHandController().playHumanMove();
-            });
-        });
+        raiseBBBtn.setOnAction(e ->
+                runInNewThread(() -> {
+                    disableActionControls();
+                    gameController.getPlayerControllerHuman().setNextDecisionToRaiseBB();
+                    gameController.getAIGameGameHandController().playHumanMove();
+                })
+        );
         raise3BBBtn = new Button("3BB");
+        raise3BBBtn.setOnAction(e ->
+                runInNewThread(() -> {
+                    disableActionControls();
+                    gameController.getPlayerControllerHuman().setNextDecisionToRaise3BB();
+                    gameController.getAIGameGameHandController().playHumanMove();
+                })
+        );
+
         raiseAllBtn = new Button("All IN");
         raiseOKBtn = new Button("RAISE");
+        raiseOKBtn.setOnAction((e ->
+                runInNewThread(() -> {
+                    disableActionControls();
+                    int amount = Integer.parseInt(raiseAmountTextField.getText());
+                    gameController.getPlayerControllerHuman().setNextDecision(BettingDecision.raise(amount));
+                    gameController.getAIGameGameHandController().playHumanMove();
+                })
+        ));
 
         HBox hBox = new HBox();
         hBox.setSpacing(15);
@@ -148,24 +157,18 @@ public class AIGameApp extends Application implements GameEventHandler {
 //      only support fixed raise for now
 
         hBox.getChildren().add(raiseBBBtn);
-//        hBox.getChildren().add(raise3BBBtn);
+        hBox.getChildren().add(raise3BBBtn);
 //        hBox.getChildren().add(raiseAllBtn);
-//        raiseAmountTextField = new TextField();
-//        raiseAmountTextField.setAlignment(Pos.CENTER_RIGHT);
-//        hBox.getChildren().add(raiseAmountTextField);
-//        hBox.getChildren().add(raiseOKBtn);
+        raiseAmountTextField = new TextField();
+        raiseAmountTextField.setAlignment(Pos.CENTER_RIGHT);
+        hBox.getChildren().add(raiseAmountTextField);
+        hBox.getChildren().add(raiseOKBtn);
         outerContainer.getChildren().add(hBox);
     }
 
     private void nextHand() {
-        playerInfoPanes.forEach(playerInfoPane -> {
-            playerInfoPane.setDealer(false);
-            playerInfoPane.setBB(false);
-            playerInfoPane.setSB(false);
-            playerInfoPane.setWinner(false);
-            playerInfoPane.setBetMoney(0);
-            playerInfoPane.setOnTurn(false);
-            playerInfoPane.setHoleCardInfo("    ");
+        playerInfoPaneMap.forEach((name, playerInfoPane) -> {
+            playerInfoPane.clearStatus();
         });
         publicCardsLabel.setText("");
         runInNewThread(() -> gameController.play());
@@ -175,27 +178,37 @@ public class AIGameApp extends Application implements GameEventHandler {
         new Thread(runnable).start();
     }
 
-    private PlayerInfoPane getHumanPlayerInfoPane() {
-        return playerInfoPanes.get(playerInfoPanes.size() - 1);
-    }
-
     @Override
     public void handleGameEvent(GameEvent gameEvent) {
         Platform.runLater(()->{
             switch (gameEvent.eventName()) {
+                case PlayerCreated.EVENT_NAME: {
+                    PlayerCreated playerCreated = (PlayerCreated) gameEvent;
+                    int row = 0;
+                    for (Player player : playerCreated.getPlayer()) {
+                        PlayerInfoPane infoPane = new PlayerInfoPane(player.getName(), playerInfoGridPane, row++);
+                        playerInfoPaneMap.put(player.getName(), infoPane);
+                    }
+                    break;
+                }
+                case PlayerBalanceChanged.EVENT_NAME: {
+                    PlayerBalanceChanged playerBalanceChanged = (PlayerBalanceChanged) gameEvent;
+                    getInfoPaneFromPlayer(playerBalanceChanged.getPlayer()).setBalance(playerBalanceChanged.getPlayer().getMoney());
+                    break;
+                }
                 case GameHandStarted.EVENT_NAME: {
                     GameHandStarted gameHandStarted = (GameHandStarted) gameEvent;
                     setDealer(gameHandStarted.getDealer());
-                    playerInfoPanes.get(gameHandStarted.getBb().getNumber() - 1).setBB(true);
-                    playerInfoPanes.get(gameHandStarted.getSb().getNumber() - 1).setSB(true);
+                    getInfoPaneFromPlayer(gameHandStarted.getBbPlayer()).setBB(true);
+                    getInfoPaneFromPlayer(gameHandStarted.getSbPlayer()).setSB(true);
                     break;
                 }
                 case HoleCardsDealt.EVENT_NAME: {
                     HoleCardsDealt holeCardsDealt = (HoleCardsDealt) gameEvent;
                     if (holeCardsDealt.getPlayer().isHumanPlayer()) {
-                        getHumanPlayerInfoPane().setHoleCardInfo(holeCardsDealt.getCards().get(0) + " " + holeCardsDealt.getCards().get(1));
+                        getInfoPaneFromPlayer(holeCardsDealt.getPlayer()).setHoleCardInfo(holeCardsDealt.getCards().get(0) + " " + holeCardsDealt.getCards().get(1));
                     } else {
-                        playerInfoPanes.get(holeCardsDealt.getPlayer().getNumber() - 1).setHoleCardInfo("--- ---");
+                        getInfoPaneFromPlayer(holeCardsDealt.getPlayer()).setHoleCardInfo("--- ---");
                     }
                     break;
                 }
@@ -221,36 +234,25 @@ public class AIGameApp extends Application implements GameEventHandler {
                 }
                 case BetPlaced.EVENT_NAME: {
                     BetPlaced betPlaced = (BetPlaced) gameEvent;
-                    playerInfoPanes.get(betPlaced.getPlayer().getNumber() - 1).addBetMoney(betPlaced.getAmount());
+                    getInfoPaneFromPlayer(betPlaced.getPlayer()).addBetMoney(betPlaced.getAmount());
                     break;
                 }
-                case PlayerCreated.EVENT_NAME: {
-                    //TODO
-                    break;
-                }
-                case PlayerBalanceChanged.EVENT_NAME: {
-                    PlayerBalanceChanged playerBalanceChanged = (PlayerBalanceChanged) gameEvent;
-                    playerInfoPanes.get(playerBalanceChanged.getPlayer().getNumber() - 1).setBalance(playerBalanceChanged.getPlayer().getMoney());
+                case DecisionMade.EVENT_NAME: {
+                    DecisionMade decisionMade = (DecisionMade) gameEvent;
+                    getInfoPaneFromPlayer(decisionMade.getPlayer()).showBettingDecision(decisionMade.getBettingDecision());
                     break;
                 }
                 case HandCompleted.EVENT_NAME: {
                     HandCompleted handCompleted = (HandCompleted) gameEvent;
                     for (Player winner : handCompleted.getWinners()) {
-                        playerInfoPanes.get(winner.getNumber() - 1).setWinner(true);
+                        getInfoPaneFromPlayer(winner).setWinner(true);
                     }
-
                     for(Player showDownPlayer : handCompleted.getShowdownPlayers()) {
-                        playerInfoPanes.get(showDownPlayer.getNumber() - 1).setHoleCardInfo(showDownPlayer.getHoleCards().get(0) + " " + showDownPlayer.getHoleCards().get(1));
+                        getInfoPaneFromPlayer(showDownPlayer).setHoleCardInfo(showDownPlayer.getHoleCards().get(0) + " " + showDownPlayer.getHoleCards().get(1));
                     }
-
                     disableActionControls();
                     nextHandBtn.setDisable(false);
                     handStarted = false;
-                    break;
-                }
-                case DecisionMade.EVENT_NAME: {
-                    DecisionMade decisionMade = (DecisionMade) gameEvent;
-                    playerInfoPanes.get(decisionMade.getPlayer().getNumber() - 1).showBettingDecision(decisionMade.getBettingDecision());
                     break;
                 }
             }
@@ -258,7 +260,8 @@ public class AIGameApp extends Application implements GameEventHandler {
     }
 
     private void setDealer(Player player) {
-        playerInfoPanes.get(player.getNumber() - 1).setDealer(true);
+        playerInfoPaneMap.forEach((name, infoPane) -> infoPane.setDealer(false));
+        getInfoPaneFromPlayer(player).setDealer(true);
     }
 
     private void appendToPublicCardsLabel(List<Card> s) {
@@ -266,8 +269,8 @@ public class AIGameApp extends Application implements GameEventHandler {
     }
 
     private void setPlayerOnTurn(Player player) {
-        playerInfoPanes.forEach(playerInfoPane -> playerInfoPane.setOnTurn(false));
-        playerInfoPanes.get(player.getNumber() - 1).setOnTurn(true);
+        playerInfoPaneMap.forEach((name, playerInfoPane) -> playerInfoPane.setOnTurn(false));
+        getInfoPaneFromPlayer(player).setOnTurn(true);
 
         if(player.isHumanPlayer()) {
             enableActionControls();
@@ -282,4 +285,7 @@ public class AIGameApp extends Application implements GameEventHandler {
         Stream.of(foldBtn, callBtn, raiseBBBtn, raise3BBBtn, raiseAllBtn, raiseOKBtn, raiseAmountTextField).filter(Objects::nonNull).forEach(control -> {control.setDisable(false);});
     }
 
+    private PlayerInfoPane getInfoPaneFromPlayer(Player player) {
+        return playerInfoPaneMap.get(player.getName());
+    }
 }

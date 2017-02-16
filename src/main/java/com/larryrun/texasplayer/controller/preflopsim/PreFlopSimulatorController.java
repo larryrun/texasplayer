@@ -47,11 +47,11 @@ public class PreFlopSimulatorController {
     public void play() {
         this.equivalenceClassController.generateAllEquivalenceClass();
 
-        game.addPlayer(new Player(1, gameProperties.getInitialMoney(), playerControllerPreFlopRoll, gameEventDispatcher));
+        game.addPlayer(new Player("player1", 1, gameProperties.getInitialMoney(), playerControllerPreFlopRoll, gameEventDispatcher));
         Collection<EquivalenceClass> equivalenceClasses = equivalenceClassController.getEquivalenceClasses();
 
         for (int numberOfPlayers = 2; numberOfPlayers <= 10; numberOfPlayers++) {
-            game.addPlayer(new Player(numberOfPlayers, 0, playerControllerPreFlopRoll, gameEventDispatcher));
+            game.addPlayer(new Player("player2", numberOfPlayers, 0, playerControllerPreFlopRoll, gameEventDispatcher));
 
             for (EquivalenceClass equivalenceClass : equivalenceClasses) {
                 statisticsController.initializeStatistics();

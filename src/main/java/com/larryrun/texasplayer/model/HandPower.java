@@ -44,4 +44,14 @@ public class HandPower implements Comparable<HandPower> {
     public List<CardNumber> getTieBreakingInformation() {
         return tieBreakingInformation;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == this)
+            return true;
+        else if(obj instanceof HandPower) {
+            return this.compareTo((HandPower)obj) == 0;
+        }
+        return false;
+    }
 }

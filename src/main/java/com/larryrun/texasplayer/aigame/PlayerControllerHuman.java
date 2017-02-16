@@ -10,7 +10,8 @@ import com.larryrun.texasplayer.utils.AssertUtils;
 import java.util.List;
 
 public class PlayerControllerHuman extends PlayerController {
-    private BettingDecision nextDecision;
+    private volatile BettingDecision nextDecision;
+    private volatile int bbMultiplyTo = 1;
 
     @Override
     protected BettingDecision decidePreFlop(Player player, GameHand gameHand, List<Card> cards) {
@@ -32,13 +33,40 @@ public class PlayerControllerHuman extends PlayerController {
         this.nextDecision = nextDecision;
     }
 
+    public void setNextDecisionToFold() {
+        this.nextDecision = BettingDecision.FOLD;
+    }
+
+    public void setNextDecisionToCall() {
+        this.nextDecision = BettingDecision.CALL;
+    }
+
+    public void setNextDecisionToRaise3BB() {
+        this.nextDecision = BettingDecision.raise(-1);
+        bbMultiplyTo = 3;
+    }
+
+    public void setNextDecisionToRaise2BB() {
+        this.nextDecision = BettingDecision.raise(-1);
+        bbMultiplyTo = 2;
+    }
+
+    public void setNextDecisionToRaiseBB() {
+        this.nextDecision = BettingDecision.raise(-1);
+        bbMultiplyTo = 1;
+    }
+
     private void decideAmount(Player player, GameHand gameHand) {
         if(nextDecision.isCall()) {
-            int callAmount = gameHand.getCurrentBettingRound().getHighestBet() - gameHand.getCurrentBettingRound().getBetForPlayer(player);
             nextDecision = BettingDecision.CALL;
         }else if(nextDecision.isRaise()) {
-            nextDecision = BettingDecision.raise(gameHand.getCurrentBettingRound().getHighestBet() + gameHand.getGameProperties().getBigBlind());
+            if(nextDecision.getAmount() > 0) {
+                nextDecision = BettingDecision.raise(gameHand.getCurrentBettingRound().getHighestBet() + nextDecision.getAmount());
+            }else {
+                nextDecision = BettingDecision.raise(gameHand.getCurrentBettingRound().getHighestBet() + gameHand.getGameProperties().getBigBlind() * bbMultiplyTo);
+            }
         }
+        bbMultiplyTo = 1;
     }
 
 }

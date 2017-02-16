@@ -105,4 +105,15 @@ public class PlayerInfoPane extends HBox {
         else
             winLabel.setText("   ");
     }
+
+    public void clearStatus() {
+        this.setDealer(false);
+        this.setBB(false);
+        this.setSB(false);
+        this.setWinner(false);
+        this.setBetMoney(0);
+        this.setOnTurn(false);
+        this.setHoleCardInfo("    ");
+        this.actionLabel.setText("     ");
+    }
 }

@@ -11,12 +11,14 @@ import java.util.List;
 
 public class Player {
     private final int number;
+    private String name;
     private final PlayerController playerController;
     private int money;
     private List<Card> holeCards;
     private GameEventDispatcher gameEventDispatcher;
 
-    public Player(int number, int initialMoney, PlayerController playerController, GameEventDispatcher gameEventDispatcher) {
+    public Player(String name, int number, int initialMoney, PlayerController playerController, GameEventDispatcher gameEventDispatcher) {
+        this.name = name;
         this.number = number;
         this.money = initialMoney;
         this.playerController = playerController;
@@ -54,6 +56,10 @@ public class Player {
 
     public BettingDecision decide(GameHand gameHand) {
         return playerController.decide(this, gameHand);
+    }
+
+    public String getName() {
+        return name;
     }
 
     public int getNumber() {
