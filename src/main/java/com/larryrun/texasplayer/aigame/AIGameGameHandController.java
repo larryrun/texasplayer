@@ -1,5 +1,6 @@
 package com.larryrun.texasplayer.aigame;
 
+import com.google.common.collect.Lists;
 import com.larryrun.texasplayer.controller.GameEventDispatcher;
 import com.larryrun.texasplayer.controller.HandPowerRanker;
 import com.larryrun.texasplayer.controller.HandStrengthEvaluator;
@@ -13,6 +14,7 @@ import com.larryrun.texasplayer.utils.Logger;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class AIGameGameHandController {
@@ -50,15 +52,13 @@ public class AIGameGameHandController {
     private GameHand createGameHand(Game game) {
         GameHand gameHand = new GameHand(game.getPlayers(), gameProperties, gameEventDispatcher);
 
-        Player dealer = game.getPlayers().get(0),
-                sb = game.getPlayers().get(1),
-                bb;
-        if(game.getPlayers().size() == 2) {
-            bb = dealer;
-        }else {
-            bb = game.getPlayers().get(2);
-        }
-        gameEventDispatcher.fireEvent(new GameHandStarted(dealer, bb, sb));
+
+        List<Player> players = game.getPlayers();
+        Player sb = game.getPlayers().get(0),
+                bb = game.getPlayers().get(1),
+                //dealer is the last player
+                dealer = game.getPlayers().get(players.size() - 1);
+        gameEventDispatcher.fireEvent(new GameHandStarted(dealer, sb, bb));
 
         game.addGameHand(gameHand);
         return gameHand;
@@ -80,6 +80,7 @@ public class AIGameGameHandController {
         }
 
         playAIMoveUntilHumanPlayerTurn();
+
     }
 
     private void playAIMoveUntilHumanPlayerTurn() {
@@ -108,15 +109,17 @@ public class AIGameGameHandController {
             toPlay--;
         }
 
-        if (currentGameHand.getPlayersCount() == 1) {
-            Player winner = currentGameHand.getCurrentPlayer();
-            winner.addMoney(currentGameHand.getTotalBets());
+        if(toPlay == 0) {
+            if (currentGameHand.getPlayersCount() == 1) {
+                Player winner = currentGameHand.getCurrentPlayer();
+                winner.addMoney(currentGameHand.getTotalBets());
 
-            gameEventDispatcher.fireEvent(new HandCompleted(winner, false));
-        }else if(currentGameHand.getBettingRoundName().equals(BettingRoundName.POST_RIVER)) {
-            showDown(currentGameHand);
-        }else if(toPlay == 0){
-            startNewRound();
+                gameEventDispatcher.fireEvent(new HandCompleted(Lists.newArrayList(winner), Collections.emptyList()));
+            }else if(currentGameHand.getBettingRoundName().equals(BettingRoundName.POST_RIVER)) {
+                showDown(currentGameHand);
+            }else {
+                startNewRound();
+            }
         }
     }
 
@@ -193,7 +196,7 @@ public class AIGameGameHandController {
             modulo--;
         }
 
-        gameEventDispatcher.fireEvent(new HandCompleted(winners, true));
+        gameEventDispatcher.fireEvent(new HandCompleted(winners, gameHand.getPlayers()));
 
         // Opponent modeling
         opponentModeler.save(gameHand);

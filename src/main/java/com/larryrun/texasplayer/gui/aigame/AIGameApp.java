@@ -49,7 +49,7 @@ public class AIGameApp extends Application implements GameEventHandler {
             initGame();
 
 
-            Scene scene = new Scene(outerContainer, 800, 600);
+            Scene scene = new Scene(outerContainer, 600, 450);
             primaryStage.setScene(scene);
             scene.getStylesheets().add(ClassLoader.getSystemResource("style/css/AppMain.css").toExternalForm());
             primaryStage.show();
@@ -237,10 +237,12 @@ public class AIGameApp extends Application implements GameEventHandler {
                     HandCompleted handCompleted = (HandCompleted) gameEvent;
                     for (Player winner : handCompleted.getWinners()) {
                         playerInfoPanes.get(winner.getNumber() - 1).setWinner(true);
-                        if(handCompleted.isShowDown()) {
-                            playerInfoPanes.get(winner.getNumber() - 1).setHoleCardInfo(winner.getHoleCards().get(0) + " " + winner.getHoleCards().get(1));
-                        }
                     }
+
+                    for(Player showDownPlayer : handCompleted.getShowdownPlayers()) {
+                        playerInfoPanes.get(showDownPlayer.getNumber() - 1).setHoleCardInfo(showDownPlayer.getHoleCards().get(0) + " " + showDownPlayer.getHoleCards().get(1));
+                    }
+
                     disableActionControls();
                     nextHandBtn.setDisable(false);
                     handStarted = false;
