@@ -187,6 +187,7 @@ public class AIGameApp extends Application implements GameEventHandler {
                     int row = 0;
                     for (Player player : playerCreated.getPlayer()) {
                         PlayerInfoPane infoPane = new PlayerInfoPane(player.getName(), playerInfoGridPane, row++);
+                        infoPane.setBalance(player.getMoney());
                         playerInfoPaneMap.put(player.getName(), infoPane);
                     }
                     break;

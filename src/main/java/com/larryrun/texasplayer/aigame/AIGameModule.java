@@ -25,7 +25,7 @@ public class AIGameModule extends AbstractModule {
         bind(LogLevel.class).toInstance(LogLevel.ALL);
         bind(Logger.class).toProvider(LoggerProvider.class).in(Singleton.class);
 
-        bind(GameProperties.class).to(AIGameProperties.class);
+        bind(GameProperties.class).to(AIGameProperties.class).in(Singleton.class);
     }
 
     @Provides
