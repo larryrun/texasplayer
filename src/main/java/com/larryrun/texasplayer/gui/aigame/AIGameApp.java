@@ -139,6 +139,7 @@ public class AIGameApp extends Application implements GameEventHandler {
                 })
         );
 
+        /*
         raiseAllBtn = new Button("All IN");
         raiseOKBtn = new Button("RAISE");
         raiseOKBtn.setOnAction((e ->
@@ -149,6 +150,7 @@ public class AIGameApp extends Application implements GameEventHandler {
                     gameController.getAIGameGameHandController().playHumanMove();
                 })
         ));
+        */
 
         HBox hBox = new HBox();
         hBox.setSpacing(15);
@@ -159,10 +161,10 @@ public class AIGameApp extends Application implements GameEventHandler {
         hBox.getChildren().add(raiseBBBtn);
         hBox.getChildren().add(raise3BBBtn);
 //        hBox.getChildren().add(raiseAllBtn);
-        raiseAmountTextField = new TextField();
-        raiseAmountTextField.setAlignment(Pos.CENTER_RIGHT);
-        hBox.getChildren().add(raiseAmountTextField);
-        hBox.getChildren().add(raiseOKBtn);
+//        raiseAmountTextField = new TextField();
+//        raiseAmountTextField.setAlignment(Pos.CENTER_RIGHT);
+//        hBox.getChildren().add(raiseAmountTextField);
+//        hBox.getChildren().add(raiseOKBtn);
         outerContainer.getChildren().add(hBox);
     }
 
