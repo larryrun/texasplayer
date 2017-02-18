@@ -12,6 +12,7 @@ import java.util.List;
 public class PlayerControllerHuman extends PlayerController {
     private volatile BettingDecision nextDecision;
     private volatile int bbMultiplyTo = 1;
+    private volatile boolean allIn = false;
 
     @Override
     protected BettingDecision decidePreFlop(Player player, GameHand gameHand, List<Card> cards) {
@@ -56,6 +57,11 @@ public class PlayerControllerHuman extends PlayerController {
         bbMultiplyTo = 1;
     }
 
+    public void setNextDecisionToRaiseAllIn() {
+        this.nextDecision = BettingDecision.raise(-1);
+        allIn = true;
+    }
+
     private void decideAmount(Player player, GameHand gameHand) {
         if(nextDecision.isCall()) {
             nextDecision = BettingDecision.CALL;
@@ -63,7 +69,11 @@ public class PlayerControllerHuman extends PlayerController {
             if(nextDecision.getAmount() > 0) {
                 nextDecision = BettingDecision.raise(gameHand.getCurrentBettingRound().getHighestBet() + nextDecision.getAmount());
             }else {
-                nextDecision = BettingDecision.raise(gameHand.getCurrentBettingRound().getHighestBet() + gameHand.getGameProperties().getBigBlind() * bbMultiplyTo);
+                if(allIn) {
+                    nextDecision = BettingDecision.raise(player.getMoney());
+                }else {
+                    nextDecision = BettingDecision.raise(gameHand.getCurrentBettingRound().getHighestBet() + gameHand.getGameProperties().getBigBlind() * bbMultiplyTo);
+                }
             }
         }
         bbMultiplyTo = 1;

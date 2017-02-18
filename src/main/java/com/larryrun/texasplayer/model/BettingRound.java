@@ -30,7 +30,6 @@ public class BettingRound {
             placeBet(player, bettingDecision.getAmount());
         }else if(bettingDecision.isCall()) {
             placeBet(player, highestBet);
-
         }
 
 
@@ -49,6 +48,10 @@ public class BettingRound {
             betAmount = bet;
         } else {
             betAmount = bet - playerBet;
+        }
+        if(player.getMoney() < betAmount) {
+            //when player does not have the required money, we will treat this as a ALL IN bet
+            betAmount = player.getMoney();
         }
         player.removeMoney(betAmount);
 

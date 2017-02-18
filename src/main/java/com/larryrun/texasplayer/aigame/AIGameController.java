@@ -9,6 +9,7 @@ public class AIGameController {
     private final Game game;
     private final AIGameGameHandController aiGameGameHandController;
     private final PlayerControllerHuman playerControllerHuman;
+    private final GameProperties gameProperties;
 
     @Inject
     public AIGameController(final AIGameGameHandController gameHandController,
@@ -16,6 +17,7 @@ public class AIGameController {
                             final PlayerControllerHuman playerControllerHuman) {
         this.aiGameGameHandController = gameHandController;
         this.playerControllerHuman = playerControllerHuman;
+        this.gameProperties = gameProperties;
 
         game = new Game(gameProperties.getPlayers());
     }
@@ -31,5 +33,9 @@ public class AIGameController {
 
     public PlayerControllerHuman getPlayerControllerHuman() {
         return playerControllerHuman;
+    }
+
+    public GameProperties getGameProperties() {
+        return gameProperties;
     }
 }

@@ -30,6 +30,8 @@ public class AIGameApp extends Application implements GameEventHandler {
     private AIGameController gameController;
 
     private Map<String, PlayerInfoPane> playerInfoPaneMap;
+    private Map<String, Player> playerMap;
+
     private VBox outerContainer;
     private GridPane playerInfoGridPane;
     private boolean handStarted;
@@ -139,8 +141,14 @@ public class AIGameApp extends Application implements GameEventHandler {
                 })
         );
 
-        /*
         raiseAllBtn = new Button("All IN");
+        raiseAllBtn.setOnAction(e ->
+                runInNewThread(() -> {
+                    disableActionControls();
+                    gameController.getPlayerControllerHuman().setNextDecisionToRaiseAllIn();
+                    gameController.getAIGameGameHandController().playHumanMove();
+                })
+        );
         raiseOKBtn = new Button("RAISE");
         raiseOKBtn.setOnAction((e ->
                 runInNewThread(() -> {
@@ -150,21 +158,18 @@ public class AIGameApp extends Application implements GameEventHandler {
                     gameController.getAIGameGameHandController().playHumanMove();
                 })
         ));
-        */
 
         HBox hBox = new HBox();
         hBox.setSpacing(15);
         hBox.getChildren().add(foldBtn);
         hBox.getChildren().add(callBtn);
-//      only support fixed raise for now
-
         hBox.getChildren().add(raiseBBBtn);
         hBox.getChildren().add(raise3BBBtn);
-//        hBox.getChildren().add(raiseAllBtn);
-//        raiseAmountTextField = new TextField();
-//        raiseAmountTextField.setAlignment(Pos.CENTER_RIGHT);
-//        hBox.getChildren().add(raiseAmountTextField);
-//        hBox.getChildren().add(raiseOKBtn);
+        hBox.getChildren().add(raiseAllBtn);
+        raiseAmountTextField = new TextField();
+        raiseAmountTextField.setAlignment(Pos.CENTER_RIGHT);
+        hBox.getChildren().add(raiseAmountTextField);
+        hBox.getChildren().add(raiseOKBtn);
         outerContainer.getChildren().add(hBox);
     }
 
@@ -188,7 +193,7 @@ public class AIGameApp extends Application implements GameEventHandler {
                     PlayerCreated playerCreated = (PlayerCreated) gameEvent;
                     int row = 0;
                     for (Player player : playerCreated.getPlayer()) {
-                        PlayerInfoPane infoPane = new PlayerInfoPane(player.getName(), playerInfoGridPane, row++);
+                        PlayerInfoPane infoPane = new PlayerInfoPane(player.getName(), playerInfoGridPane, row++, player);
                         infoPane.setBalance(player.getMoney());
                         playerInfoPaneMap.put(player.getName(), infoPane);
                     }
@@ -254,7 +259,10 @@ public class AIGameApp extends Application implements GameEventHandler {
                         getInfoPaneFromPlayer(showDownPlayer).setHoleCardInfo(showDownPlayer.getHoleCards().get(0) + " " + showDownPlayer.getHoleCards().get(1));
                     }
                     disableActionControls();
-                    nextHandBtn.setDisable(false);
+
+                    if(allPlayersHaveMoneyToPlayNextHand()) {
+                        nextHandBtn.setDisable(false);
+                    }
                     handStarted = false;
                     break;
                 }
@@ -286,6 +294,13 @@ public class AIGameApp extends Application implements GameEventHandler {
 
     private void enableActionControls() {
         Stream.of(foldBtn, callBtn, raiseBBBtn, raise3BBBtn, raiseAllBtn, raiseOKBtn, raiseAmountTextField).filter(Objects::nonNull).forEach(control -> {control.setDisable(false);});
+    }
+
+    private boolean allPlayersHaveMoneyToPlayNextHand() {
+        return playerInfoPaneMap.values()
+                .stream()
+                .filter(playerInfoPane -> playerInfoPane.getPlayer().getMoney() < gameController.getGameProperties().getBigBlind())
+                .count() < 0;
     }
 
     private PlayerInfoPane getInfoPaneFromPlayer(Player player) {

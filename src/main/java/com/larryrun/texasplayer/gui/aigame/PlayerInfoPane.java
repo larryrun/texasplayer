@@ -1,6 +1,7 @@
 package com.larryrun.texasplayer.gui.aigame;
 
 import com.larryrun.texasplayer.model.BettingDecision;
+import com.larryrun.texasplayer.model.Player;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -9,8 +10,9 @@ import javafx.scene.paint.Color;
 public class PlayerInfoPane extends HBox {
     private Label onTurnLabel, dealerLabel, blindLabel, roleLabel, balanceLabel, cardLabel, actionLabel, betMoneyLabel, winLabel;
     private int betMoney;
+    private Player player;
 
-    public PlayerInfoPane(String name, GridPane outerContainer, int rowIdx) {
+    public PlayerInfoPane(String name, GridPane outerContainer, int rowIdx, Player player) {
         onTurnLabel = new Label();
         dealerLabel = new Label(" ");
         blindLabel = new Label("  ");
@@ -33,6 +35,8 @@ public class PlayerInfoPane extends HBox {
         outerContainer.add(actionLabel, columnIdx++, rowIdx);
         outerContainer.add(betMoneyLabel, columnIdx++, rowIdx);
         outerContainer.add(winLabel, columnIdx, rowIdx);
+
+        this.player = player;
     }
 
     public void showBettingDecision(BettingDecision bettingDecision) {
@@ -115,5 +119,9 @@ public class PlayerInfoPane extends HBox {
         this.setOnTurn(false);
         this.setHoleCardInfo("    ");
         this.actionLabel.setText("     ");
+    }
+
+    public Player getPlayer() {
+        return player;
     }
 }
