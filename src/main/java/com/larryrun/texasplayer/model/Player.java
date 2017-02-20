@@ -38,7 +38,7 @@ public class Player {
 
     @Override
     public int hashCode() {
-        return number;
+        return name.hashCode();
     }
 
     @Override

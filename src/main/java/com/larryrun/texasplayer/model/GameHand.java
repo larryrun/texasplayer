@@ -63,6 +63,14 @@ public class GameHand {
         return totalBets;
     }
 
+    public int getPlayerTotalBets(Player player) {
+        int totalBets = 0;
+        for (BettingRound bettingRound : bettingRounds) {
+            totalBets += bettingRound.getBetForPlayer(player);
+        }
+        return totalBets;
+    }
+
     public BettingRoundName getBettingRoundName() {
         return BettingRoundName.fromRoundNumber(bettingRounds.size());
     }

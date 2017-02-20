@@ -15,8 +15,7 @@ public class HandPower implements Comparable<HandPower> {
     }
 
     public int compareTo(HandPower other) {
-        int typeDifference = handPowerType.getPower()
-                - other.handPowerType.getPower();
+        int typeDifference = handPowerType.getPower() - other.handPowerType.getPower();
         if (typeDifference == 0) {
             for (int i = 0; i < tieBreakingInformation.size(); i++) {
                 int tieDifference = tieBreakingInformation.get(i).getPower()
@@ -33,8 +32,7 @@ public class HandPower implements Comparable<HandPower> {
 
     @Override
     public String toString() {
-        return handPowerType.toString() + " "
-                + tieBreakingInformation.toString();
+        return handPowerType.toString() + " " + tieBreakingInformation.toString();
     }
 
     public HandPowerType getHandPowerType() {
@@ -53,5 +51,10 @@ public class HandPower implements Comparable<HandPower> {
             return this.compareTo((HandPower)obj) == 0;
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * handPowerType.hashCode() + 31 * tieBreakingInformation.hashCode();
     }
 }
