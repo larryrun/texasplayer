@@ -1,5 +1,6 @@
 package com.larryrun.texasplayer.model;
 
+import com.larryrun.texasplayer.Play;
 import com.larryrun.texasplayer.controller.GameEventDispatcher;
 import com.larryrun.texasplayer.model.cards.Card;
 import com.larryrun.texasplayer.model.cards.Deck;
@@ -14,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class GameHand {
+    private List<Player> allPlayers;
     private final Deque<Player> players;
     private final Deck deck;
     private final List<Card> sharedCards = new ArrayList<Card>();
@@ -24,6 +26,7 @@ public class GameHand {
 
 
     public GameHand(List<Player> players, GameProperties gameProperties, GameEventDispatcher gameEventDispatcher) {
+        this.allPlayers = new ArrayList<>(players);
         this.players = new LinkedList<>(players);
         this.gameProperties = gameProperties;
         this.gameEventDispatcher = gameEventDispatcher;
@@ -70,6 +73,7 @@ public class GameHand {
         }
         return totalBets;
     }
+
 
     public BettingRoundName getBettingRoundName() {
         return BettingRoundName.fromRoundNumber(bettingRounds.size());
@@ -143,6 +147,10 @@ public class GameHand {
 
     public Deque<Player> getPlayers() {
         return this.players;
+    }
+
+    public List<Player> getAllPlayers() {
+        return this.allPlayers;
     }
 
     public void applyDecision(Player player, BettingDecision bettingDecision, GameProperties gameProperties, double handStrength) {

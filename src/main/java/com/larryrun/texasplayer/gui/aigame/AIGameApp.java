@@ -300,7 +300,7 @@ public class AIGameApp extends Application implements GameEventHandler {
         return playerInfoPaneMap.values()
                 .stream()
                 .filter(playerInfoPane -> playerInfoPane.getPlayer().getMoney() < gameController.getGameProperties().getBigBlind())
-                .count() < 0;
+                .count() <= 0;
     }
 
     private PlayerInfoPane getInfoPaneFromPlayer(Player player) {

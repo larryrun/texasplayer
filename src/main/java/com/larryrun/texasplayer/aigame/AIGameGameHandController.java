@@ -1,6 +1,6 @@
 package com.larryrun.texasplayer.aigame;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.*;
 import com.larryrun.texasplayer.controller.GameEventDispatcher;
 import com.larryrun.texasplayer.controller.HandPowerRanker;
 import com.larryrun.texasplayer.controller.HandStrengthEvaluator;
@@ -13,9 +13,8 @@ import com.larryrun.texasplayer.model.gameproperties.GameProperties;
 import com.larryrun.texasplayer.utils.Logger;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class AIGameGameHandController {
     protected final Logger logger;
@@ -158,45 +157,84 @@ public class AIGameGameHandController {
         gameHand.applyDecision(player, bettingDecision, gameProperties, handStrength);
     }
 
-    private List<Player> getWinners(GameHand gameHand) {
+    private List<List<Player>> getPlayerHandPowerRankList(GameHand gameHand) {
         Iterable<Player> activePlayers = gameHand.getPlayers();
         List<Card> sharedCards = gameHand.getSharedCards();
 
-        HandPower bestHandPower = null;
-        List<Player> winners = new ArrayList<>();
+        TreeMultimap<HandPower, Player> handPowerRankMultimap = TreeMultimap.create(Ordering.natural(), Ordering.arbitrary());
         for (Player player : activePlayers) {
             List<Card> mergeCards = new ArrayList<>(player.getHoleCards());
             mergeCards.addAll(sharedCards);
             HandPower handPower = handPowerRanker.rank(mergeCards);
 
-            if (bestHandPower == null || handPower.compareTo(bestHandPower) > 0) {
-                winners.clear();
-                winners.add(player);
-                bestHandPower = handPower;
-            } else if (handPower.equals(bestHandPower)) {
-                winners.add(player);
+            handPowerRankMultimap.put(handPower, player);
+        }
+
+        return handPowerRankMultimap.asMap().descendingMap().values()
+                .stream()
+                .map(Lists::newArrayList)
+                .collect(Collectors.<List<Player>>toList());
+    }
+
+    private Map<Integer, Set<Player>> getPotOfPlayersMap(GameHand gameHand) {
+        TreeMultimap<Integer, Player> playerByBetMap = TreeMultimap.create(Ordering.natural(), Ordering.arbitrary());
+        for (Player player : gameHand.getAllPlayers()) {
+            int playerBet = gameHand.getPlayerTotalBets(player);
+            if(playerBet > 0) {
+                playerByBetMap.put(playerBet, player);
             }
         }
-        statisticsController.storeWinners(winners);
-        return winners;
+
+        Map<Integer, Set<Player>> potOfPlayersMap = new HashMap<>();
+        int previousBet = 0;
+        int restPlayerCount = playerByBetMap.values().size();
+        for (Integer bet : playerByBetMap.keySet()) {
+            int pot = (bet - previousBet) * restPlayerCount;
+
+            Set<Player> potPlayers = new HashSet<>();
+            playerByBetMap.asMap().tailMap(bet, true).values().forEach(potPlayers::addAll);
+
+            potOfPlayersMap.put(pot, potPlayers);
+
+            previousBet = bet;
+            restPlayerCount -= playerByBetMap.get(bet).size();
+        }
+        return potOfPlayersMap;
     }
 
     private void showDown(GameHand gameHand) {
-        List<Player> winners = getWinners(gameHand);
+        List<List<Player>> playerHandPowerRankList = getPlayerHandPowerRankList(gameHand);
+        Map<Integer, Set<Player>> potOfPlayersMap = getPotOfPlayersMap(gameHand);
 
-        // Gains
-        int gain = gameHand.getTotalBets() / winners.size();
-        int modulo = gameHand.getTotalBets() % winners.size();
-        for (Player winner : winners) {
-            int gainAndModulo = gain;
-            if (modulo > 0) {
-                gainAndModulo += modulo;
+        int totalBets = gameHand.getTotalBets();
+        for (List<Player> sameHandPowerPlayers : playerHandPowerRankList) {
+            if(totalBets <= 0)
+                break;
+
+            Map<Player, Integer> playerGainMap = new HashMap<>();
+
+            for (Map.Entry<Integer, Set<Player>> potOfPlayersEntry : potOfPlayersMap.entrySet()) {
+                Integer pot = potOfPlayersEntry.getKey();
+                Set<Player> sameBetPlayers = potOfPlayersEntry.getValue();
+
+                for (Player player : sameHandPowerPlayers) {
+                    if(sameBetPlayers.contains(player)) {
+                        int gain = pot / sameHandPowerPlayers.size();
+                        totalBets -= gain;
+
+                        Integer gainSum = playerGainMap.get(player);
+                        if(gainSum == null) {
+                            playerGainMap.put(player, gain);
+                        }else {
+                            playerGainMap.put(player, gain + gainSum);
+                        }
+                    }
+                }
             }
-            winner.addMoney(gainAndModulo);
-            modulo--;
+            playerGainMap.entrySet().forEach((e)-> e.getKey().addMoney(e.getValue()));
         }
 
-        gameEventDispatcher.fireEvent(new HandCompleted(winners, gameHand.getPlayers()));
+        gameEventDispatcher.fireEvent(new HandCompleted(playerHandPowerRankList.get(0), gameHand.getPlayers()));
 
         // Opponent modeling
         opponentModeler.save(gameHand);

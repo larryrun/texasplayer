@@ -33,7 +33,7 @@ public class Player {
 
         Player otherPlayer = (Player) o;
 
-        return number == otherPlayer.number;
+        return name.equals(otherPlayer.name);
     }
 
     @Override
